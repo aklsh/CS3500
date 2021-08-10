@@ -1,6 +1,17 @@
+xv6: A simple, Unix-like Teaching Operating System
+==================================================
+
 xv6 is a re-implementation of Dennis Ritchie's and Ken Thompson's Unix
-Version 6 (v6).  xv6 loosely follows the structure and style of v6,
+Version 6 (v6). xv6 loosely follows the structure and style of v6,
 but is implemented for a modern RISC-V multiprocessor using ANSI C.
 
-ACKNOWLEDGMENTS
+Notes to Self
+-------------
+- Install riscv-gnu-toolchain (64-bit) and qemu to tools/
+- Add new programs you write to Makefile
+- make qemu: to enter into xv6
+- make qemu-gdb: to debug programs. Connect to the process from gdb in another shell
+
+Acknowledgments
+---------------
 Fork of https://github.com/mit-pdos/xv6-riscv
