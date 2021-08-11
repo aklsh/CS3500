@@ -7,10 +7,10 @@ but is implemented for a modern RISC-V multiprocessor using ANSI C.
 
 Notes to Self
 -------------
-- Install riscv-gnu-toolchain (64-bit) and qemu to tools/
+- Install riscv-gnu-toolchain (64-bit) and qemu (5.1/5.2 only) to tools/
 - Add new programs you write to Makefile
 - make qemu: to enter into xv6
-- make qemu-gdb: to debug programs. Connect to the process from gdb in another shell
+- make qemu-gdb: to debug programs. Connect to running xv6 from gdb in another shell
 
 Acknowledgments
 ---------------
