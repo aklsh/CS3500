@@ -8,9 +8,7 @@
 #include "defs.h"
 
 // Fetch the uint64 at addr from the current process.
-int
-fetchaddr(uint64 addr, uint64 *ip)
-{
+int fetchaddr(uint64 addr, uint64 *ip){
   struct proc *p = myproc();
   if(addr >= p->sz || addr+sizeof(uint64) > p->sz)
     return -1;
@@ -21,9 +19,7 @@ fetchaddr(uint64 addr, uint64 *ip)
 
 // Fetch the nul-terminated string at addr from the current process.
 // Returns length of string, not including nul, or -1 for error.
-int
-fetchstr(uint64 addr, char *buf, int max)
-{
+int fetchstr(uint64 addr, char *buf, int max){
   struct proc *p = myproc();
   int err = copyinstr(p->pagetable, buf, addr, max);
   if(err < 0)
@@ -31,9 +27,7 @@ fetchstr(uint64 addr, char *buf, int max)
   return strlen(buf);
 }
 
-static uint64
-argraw(int n)
-{
+static uint64 argraw(int n){
   struct proc *p = myproc();
   switch (n) {
   case 0:
@@ -54,9 +48,7 @@ argraw(int n)
 }
 
 // Fetch the nth 32-bit system call argument.
-int
-argint(int n, int *ip)
-{
+int argint(int n, int *ip){
   *ip = argraw(n);
   return 0;
 }
@@ -64,9 +56,7 @@ argint(int n, int *ip)
 // Retrieve an argument as a pointer.
 // Doesn't check for legality, since
 // copyin/copyout will do that.
-int
-argaddr(int n, uint64 *ip)
-{
+int argaddr(int n, uint64 *ip){
   *ip = argraw(n);
   return 0;
 }
@@ -74,9 +64,7 @@ argaddr(int n, uint64 *ip)
 // Fetch the nth word-sized system call argument as a null-terminated string.
 // Copies into buf, at most max.
 // Returns string length if OK (including nul), -1 if error.
-int
-argstr(int n, char *buf, int max)
-{
+int argstr(int n, char *buf, int max){
   uint64 addr;
   if(argaddr(n, &addr) < 0)
     return -1;
@@ -129,9 +117,7 @@ static uint64 (*syscalls[])(void) = {
 [SYS_close]   sys_close,
 };
 
-void
-syscall(void)
-{
+void syscall(void){
   int num;
   struct proc *p = myproc();
 

@@ -20,7 +20,7 @@
 // the address of virtio mmio register r.
 #define R(r) ((volatile uint32 *)(VIRTIO0 + (r)))
 
-static struct disk {
+static struct disk{
   // the virtio driver and device mostly communicate through a set of
   // structures in RAM. pages[] allocates that memory. pages[] is a
   // global (instead of calls to kalloc()) because it must consist of
@@ -73,9 +73,7 @@ static struct disk {
   
 } __attribute__ ((aligned (PGSIZE))) disk;
 
-void
-virtio_disk_init(void)
-{
+void virtio_disk_init(void){
   uint32 status = 0;
 
   initlock(&disk.vdisk_lock, "virtio_disk");
@@ -141,9 +139,7 @@ virtio_disk_init(void)
 }
 
 // find a free descriptor, mark it non-free, return its index.
-static int
-alloc_desc()
-{
+static int alloc_desc(){
   for(int i = 0; i < NUM; i++){
     if(disk.free[i]){
       disk.free[i] = 0;
@@ -154,9 +150,7 @@ alloc_desc()
 }
 
 // mark a descriptor as free.
-static void
-free_desc(int i)
-{
+static void free_desc(int i){
   if(i >= NUM)
     panic("free_desc 1");
   if(disk.free[i])
@@ -170,9 +164,7 @@ free_desc(int i)
 }
 
 // free a chain of descriptors.
-static void
-free_chain(int i)
-{
+static void free_chain(int i){
   while(1){
     int flag = disk.desc[i].flags;
     int nxt = disk.desc[i].next;
@@ -186,9 +178,7 @@ free_chain(int i)
 
 // allocate three descriptors (they need not be contiguous).
 // disk transfers always use three descriptors.
-static int
-alloc3_desc(int *idx)
-{
+static int alloc3_desc(int *idx){
   for(int i = 0; i < 3; i++){
     idx[i] = alloc_desc();
     if(idx[i] < 0){
@@ -200,9 +190,7 @@ alloc3_desc(int *idx)
   return 0;
 }
 
-void
-virtio_disk_rw(struct buf *b, int write)
-{
+void virtio_disk_rw(struct buf *b, int write){
   uint64 sector = b->blockno * (BSIZE / 512);
 
   acquire(&disk.vdisk_lock);
@@ -279,9 +267,7 @@ virtio_disk_rw(struct buf *b, int write)
   release(&disk.vdisk_lock);
 }
 
-void
-virtio_disk_intr()
-{
+void virtio_disk_intr(){
   acquire(&disk.vdisk_lock);
 
   // the device won't raise another interrupt until we tell it

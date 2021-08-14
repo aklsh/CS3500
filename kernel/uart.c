@@ -49,9 +49,7 @@ extern volatile int panicked; // from printf.c
 
 void uartstart();
 
-void
-uartinit(void)
-{
+void uartinit(void){
   // disable interrupts.
   WriteReg(IER, 0x00);
 
@@ -83,9 +81,7 @@ uartinit(void)
 // because it may block, it can't be called
 // from interrupts; it's only suitable for use
 // by write().
-void
-uartputc(int c)
-{
+void uartputc(int c){
   acquire(&uart_tx_lock);
 
   if(panicked){
@@ -112,9 +108,7 @@ uartputc(int c)
 // use interrupts, for use by kernel printf() and
 // to echo characters. it spins waiting for the uart's
 // output register to be empty.
-void
-uartputc_sync(int c)
-{
+void uartputc_sync(int c){
   push_off();
 
   if(panicked){
@@ -134,9 +128,7 @@ uartputc_sync(int c)
 // in the transmit buffer, send it.
 // caller must hold uart_tx_lock.
 // called from both the top- and bottom-half.
-void
-uartstart()
-{
+void uartstart(){
   while(1){
     if(uart_tx_w == uart_tx_r){
       // transmit buffer is empty.
@@ -162,9 +154,7 @@ uartstart()
 
 // read one input character from the UART.
 // return -1 if none is waiting.
-int
-uartgetc(void)
-{
+int uartgetc(void){
   if(ReadReg(LSR) & 0x01){
     // input data is ready.
     return ReadReg(RHR);
@@ -176,9 +166,7 @@ uartgetc(void)
 // handle a uart interrupt, raised because input has
 // arrived, or the uart is ready for more output, or
 // both. called from trap.c.
-void
-uartintr(void)
-{
+void uartintr(void){
   // read and process incoming characters.
   while(1){
     int c = uartgetc();

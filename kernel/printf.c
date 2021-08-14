@@ -18,16 +18,14 @@
 volatile int panicked = 0;
 
 // lock to avoid interleaving concurrent printf's.
-static struct {
+static struct{
   struct spinlock lock;
   int locking;
 } pr;
 
 static char digits[] = "0123456789abcdef";
 
-static void
-printint(int xx, int base, int sign)
-{
+static void printint(int xx, int base, int sign){
   char buf[16];
   int i;
   uint x;
@@ -49,9 +47,7 @@ printint(int xx, int base, int sign)
     consputc(buf[i]);
 }
 
-static void
-printptr(uint64 x)
-{
+static void printptr(uint64 x){
   int i;
   consputc('0');
   consputc('x');
@@ -60,9 +56,7 @@ printptr(uint64 x)
 }
 
 // Print to the console. only understands %d, %x, %p, %s.
-void
-printf(char *fmt, ...)
-{
+void printf(char *fmt, ...){
   va_list ap;
   int i, c, locking;
   char *s;
@@ -114,9 +108,7 @@ printf(char *fmt, ...)
     release(&pr.lock);
 }
 
-void
-panic(char *s)
-{
+void panic(char *s){
   pr.locking = 0;
   printf("panic: ");
   printf(s);
@@ -126,9 +118,7 @@ panic(char *s)
     ;
 }
 
-void
-printfinit(void)
-{
+void printfinit(void){
   initlock(&pr.lock, "pr");
   pr.locking = 1;
 }
