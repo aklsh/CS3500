@@ -19,9 +19,9 @@ int main(int argc, char* argv[]){
     exit(1);
   }
 
+  printf("[USER]: entered user/sleep.c\n");
   ticks = atoi(argv[1]);
-  printf("[USER]: before sleep\n");
   sleep(ticks);
-  printf("[USER]: after sleep\n");
+  printf("[USER]: exited user/sleep.c\n");
   exit(0);
 }

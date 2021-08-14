@@ -76,18 +76,15 @@
 \begin{colorboxed}{Code}{\texttt{user/printArgs.c}}{breakable}
     \inputminted[baselinestretch=0.75,firstline=11]{c}{user/printArgs.c}
 \end{colorboxed}
-\begin{colorboxed}{Code}{\texttt{user/sleep.c}\hspace{0.29\textwidth}\textbf{Code: }\texttt{kernel/sysproc.c::sys\_sleep()}}{unbreakable}
-\begin{minipage}[t]{0.4\textwidth}
-    \inputminted[baselinestretch=0.75,firstline=10]{c}{user/sleep.c}
-\end{minipage}
-\hfill\vline\hfill
-\begin{minipage}[t]{0.5\textwidth}
-    \inputminted[baselinestretch=0.75,firstline=45,lastline=63]{c}{kernel/sysproc.c}
-\end{minipage}
+\begin{colorboxed}{Code}{\texttt{user/sleep.c} (top) and \texttt{kernel/sysproc.c::sys\_sleep()} (bottom)}{unbreakable}
+\inputminted[baselinestretch=0.75,firstline=10,breaklines]{c}{user/sleep.c}
+    \vspace{-5mm}
+\rule{\linewidth}{1pt}
+\inputminted[baselinestretch=0.75,firstline=45,lastline=66,breaklines]{c}{kernel/sysproc.c}
 \end{colorboxed}
 \section{C3}
 \begin{colorboxed}{Execution Trace}{\texttt{sleep}}{breakable}
-    \inputminted[baselinestretch=0.75]{text}{assets/gdb-trace.txt}
+    \inputminted[baselinestretch=0.75,breaklines]{text}{assets/gdb-trace.txt}
 \end{colorboxed}
 \section{C4}
 \begin{figure}[H]

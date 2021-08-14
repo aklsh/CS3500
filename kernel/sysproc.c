@@ -43,6 +43,7 @@ uint64 sys_sbrk(void){
 }
 
 uint64 sys_sleep(void){
+  printf("[KERNEL]: entered kernel/sysproc.c::sys_sleep()\n");
   int n;
   uint ticks0;
 
@@ -54,11 +55,13 @@ uint64 sys_sleep(void){
   while(ticks - ticks0 < n){
     if(myproc()->killed){
       release(&tickslock);
+      printf("[KERNEL]: killed kernel/sysproc.c::sys_sleep()\n");
       return -1;
     }
     sleep(&ticks, &tickslock);
   }
   release(&tickslock);
+  printf("[KERNEL]: exited kernel/sysproc.c::sys_sleep()\n");
   return 0;
 }
 

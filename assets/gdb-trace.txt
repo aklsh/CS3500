@@ -1,113 +1,18 @@
 ╭─aklsh@zephyrus ~/Courses/CS3500/xv6 ‹a1›
-╰─λ riscv64-unknown-elf-gdb
-GNU gdb (GDB) 10.1
-Copyright (C) 2020 Free Software Foundation, Inc.
-License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
-This is free software: you are free to change and redistribute it.
-There is NO WARRANTY, to the extent permitted by law.
-Type "show copying" and "show warranty" for details.
-This GDB was configured as "--host=x86_64-pc-linux-gnu --target=riscv64-unknown-elf".
-Type "show configuration" for configuration details.
-For bug reporting instructions, please see:
-<https://www.gnu.org/software/gdb/bugs/>.
-Find the GDB manual and other documentation resources online at:
-    <http://www.gnu.org/software/gdb/documentation/>.
+╰─λ make qemu
+qemu-system-riscv64 -machine virt -bios none -kernel kernel/kernel -m 128M -smp 3 -nographic -drive file=fs.img,if=none,format=raw,id=x0 -device virtio-blk-device,drive=x0,bus=virtio-mmio-bus.0
 
-For help, type "help".
-Type "apropos word" to search for commands related to "word".
-The target architecture is set to "riscv:rv64".
-warning: No executable has been specified and target does not support
-determining executable automatically.  Try using the "file" command.
-0x0000000000001000 in ?? ()
-(gdb) c
-Continuing.
-^C
-Thread 1 received signal SIGINT, Interrupt.
-pop_off () at kernel/spinlock.c:101
-101     {
-(gdb) symbol-file user/_sleep
-Reading symbols from user/_sleep...
-(gdb) break user/sleep.c:14
-Breakpoint 1 at 0x0: file user/sleep.c, line 14.
-(gdb) break user/sleep.c:17
-Breakpoint 2 at 0xa: file user/sleep.c, line 17.
-(gdb) break user/sleep.c:23
-Breakpoint 3 at 0x36: file user/sleep.c, line 23.
-(gdb) break user/sleep.c:25
-Breakpoint 4 at 0x50: file user/sleep.c, line 25.
-(gdb) break sleep
-Breakpoint 5 at 0x366: file user/usys.S, line 100.
-(gdb) break exit
-Breakpoint 6 at 0x2d6: file user/usys.S, line 10.
-(gdb) c
-Continuing.
+xv6 kernel is booting
 
-Thread 1 hit Breakpoint 4, main (
-argc=<error reading variable: dwarf2_find_location_expression: Corrupted DWARF expression.>,
-argv=<error reading variable: dwarf2_find_location_expression: Corrupted DWARF expression.>)
-at user/sleep.c:25
-25        printf("[USER]: after sleep\n");
-(gdb) c
-Continuing.
-[Switching to Thread 1.2]
-
-Thread 2 hit Breakpoint 1, main (
-argc=<error reading variable: dwarf2_find_location_expression: Corrupted DWARF expression.>,
-argv=<error reading variable: dwarf2_find_location_expression: Corrupted DWARF expression.>)
-at user/sleep.c:14
-14      int main(int argc, char* argv[]){
-(gdb) c
-Continuing.
-
-Thread 2 hit Breakpoint 2, main (
-argc=<error reading variable: dwarf2_find_location_expression: Corrupted DWARF expression.>,
-argv=<error reading variable: dwarf2_find_location_expression: Corrupted DWARF expression.>)
-at user/sleep.c:17
-17        if(argc != 2){
-(gdb) c
-Continuing.
-
-Thread 2 hit Breakpoint 3, main (
-argc=<error reading variable: dwarf2_find_location_expression: Corrupted DWARF expression.>,
-argv=<error reading variable: dwarf2_find_location_expression: Corrupted DWARF expression.>)
-at user/sleep.c:23
-23        printf("[USER]: before sleep\n");
-(gdb) c
-Continuing.
-
-Thread 2 hit Breakpoint 5, sleep () at user/usys.S:100
-100      li a7, SYS_sleep
-(gdb) c
-Continuing.
-[Switching to Thread 1.3]
-
-Thread 3 hit Breakpoint 4, main (
-argc=<error reading variable: dwarf2_find_location_expression: Corrupted DWARF expression.>,
-argv=<error reading variable: dwarf2_find_location_expression: Corrupted DWARF expression.>)
-at user/sleep.c:25
-25        printf("[USER]: after sleep\n");
-(gdb) c
-Continuing.
-
-Thread 3 hit Breakpoint 6, exit () at user/usys.S:10
-10       li a7, SYS_exit
-(gdb) c
-Continuing.
-[Switching to Thread 1.1]
-
-Thread 1 hit Breakpoint 1, main (
-argc=<error reading variable: dwarf2_find_location_expression: Corrupted DWARF expression.>,
-argv=<error reading variable: dwarf2_find_location_expression: Corrupted DWARF expression.>)
-at user/sleep.c:14
-14      int main(int argc, char* argv[]){
-(gdb) c
-Continuing.
-
-Thread 1 hit Breakpoint 2, main (
-argc=<error reading variable: dwarf2_find_location_expression: Corrupted DWARF expression.>,
-argv=<error reading variable: dwarf2_find_location_expression: Corrupted DWARF expression.>)
-at user/sleep.c:17
-17        if(argc != 2){
-(gdb) c
-Continuing.
-Remote connection closed
+hart 2 starting
+hart 1 starting
+init: starting sh
+$ sleep
+usage: sleep <n>
+$ sleep 10
+[USER]: entered user/sleep.c
+[KERNEL]: entered kernel/sysproc.c::sys_sleep()
+[KERNEL]: sleep for 10 ticks
+[KERNEL]: exited kernel/sysproc.c::sys_sleep()
+[USER]: exited user/sleep.c
+$ QEMU: Terminated
