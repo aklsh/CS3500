@@ -1,5 +1,5 @@
 // Mutual exclusion lock.
-struct spinlock {
+struct spinlock{
   uint locked;       // Is the lock held?
 
   // For debugging:

@@ -10,7 +10,7 @@
 
 #define PIPESIZE 512
 
-struct pipe {
+struct pipe{
   struct spinlock lock;
   char data[PIPESIZE];
   uint nread;     // number of bytes read
@@ -19,9 +19,7 @@ struct pipe {
   int writeopen;  // write fd is still open
 };
 
-int
-pipealloc(struct file **f0, struct file **f1)
-{
+int pipealloc(struct file **f0, struct file **f1){
   struct pipe *pi;
 
   pi = 0;
@@ -55,9 +53,7 @@ pipealloc(struct file **f0, struct file **f1)
   return -1;
 }
 
-void
-pipeclose(struct pipe *pi, int writable)
-{
+void pipeclose(struct pipe *pi, int writable){
   acquire(&pi->lock);
   if(writable){
     pi->writeopen = 0;
@@ -73,9 +69,7 @@ pipeclose(struct pipe *pi, int writable)
     release(&pi->lock);
 }
 
-int
-pipewrite(struct pipe *pi, uint64 addr, int n)
-{
+int pipewrite(struct pipe *pi, uint64 addr, int n){
   int i = 0;
   struct proc *pr = myproc();
 
@@ -102,9 +96,7 @@ pipewrite(struct pipe *pi, uint64 addr, int n)
   return i;
 }
 
-int
-piperead(struct pipe *pi, uint64 addr, int n)
-{
+int piperead(struct pipe *pi, uint64 addr, int n){
   int i;
   struct proc *pr = myproc();
   char ch;

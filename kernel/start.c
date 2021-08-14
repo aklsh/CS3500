@@ -17,9 +17,7 @@ uint64 timer_scratch[NCPU][5];
 extern void timervec();
 
 // entry.S jumps here in machine mode on stack0.
-void
-start()
-{
+void start(){
   // set M Previous Privilege mode to Supervisor, for mret.
   unsigned long x = r_mstatus();
   x &= ~MSTATUS_MPP_MASK;
@@ -53,9 +51,7 @@ start()
 // which arrive at timervec in kernelvec.S,
 // which turns them into software interrupts for
 // devintr() in trap.c.
-void
-timerinit()
-{
+void timerinit(){
   // each CPU has a separate source of timer interrupts.
   int id = r_mhartid();
 
