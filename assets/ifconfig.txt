@@ -1,0 +1,35 @@
+╭─aklsh@zephyrus ~/Courses/CS3500/xv6 ‹a1›
+╰─λ ifconfig
+docker0: flags=4099<UP,BROADCAST,MULTICAST>  mtu 1500
+        inet 172.17.0.1  netmask 255.255.0.0  broadcast 172.17.255.255
+        ether 02:42:8a:ad:01:35  txqueuelen 0  (Ethernet)
+        RX packets 0  bytes 0 (0.0 B)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 0  bytes 0 (0.0 B)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
+        inet 127.0.0.1  netmask 255.0.0.0
+        inet6 ::1  prefixlen 128  scopeid 0x10<host>
+        loop  txqueuelen 1000  (Local Loopback)
+        RX packets 9882  bytes 908912 (908.9 KB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 9882  bytes 908912 (908.9 KB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+virbr0: flags=4099<UP,BROADCAST,MULTICAST>  mtu 1500
+        inet 192.168.122.1  netmask 255.255.255.0  broadcast 192.168.122.255
+        ether 52:54:00:a7:df:ec  txqueuelen 1000  (Ethernet)
+        RX packets 0  bytes 0 (0.0 B)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 0  bytes 0 (0.0 B)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+wlp2s0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 192.168.0.123  netmask 255.255.255.0  broadcast 192.168.0.255
+        inet6 fe80::10a2:c55e:5051:e342  prefixlen 64  scopeid 0x20<link>
+        ether 9c:fc:e8:f2:e6:9e  txqueuelen 1000  (Ethernet)
+        RX packets 107506  bytes 78733763 (78.7 MB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 63288  bytes 22130279 (22.1 MB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
