@@ -5,6 +5,8 @@ _*
 *.asm
 *.sym
 *.img
+*.pdf
+*.gz
 vectors.S
 bootblock
 entryother
@@ -17,3 +19,4 @@ user/usys.S
 .gdbinit
 .ccls
 .ccls-cache/
+_minted-report/
