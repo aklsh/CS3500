@@ -1,0 +1,41 @@
+Assignment - 1
+--------------
+
+1. Create and demonstrate a user level program that prints the command line 
+arguments.
+For example,
+                ╭─────────────────────────────────────╮
+                │ $ myuser command1 command2 command3 │
+                │ arg0 is myuser                      │
+                │ arg1 is command1                    │
+                │ arg2 is command2                    │
+                │ arg3 is command3                    │
+                ╰─────────────────────────────────────╯
+
+2. Create and demonstrate a user level program that sleeps for x seconds.
+   You would need to use the system call 'sleep'.
+   An example output:
+                        ╭───────────────────────╮
+                        │ $ sleep 10            │
+                        │ sleeping for 10 ticks │
+                        ╰───────────────────────╯
+
+*Important*, the line "sleeping for 10 ticks" should be printed from 
+the kernel and not from your user program
+
+3. Trace the execution of the sleep program, starting from the user mode
+and going into the kernel, until the 'sleeping for 10 ticks' is printed.
+
+4. Draw the memory map for the xv6 OS on qemu
+
+Submission
+----------
+A. The assignment should be done individually
+B. We will share the assignment submission details soon
+C. To be submitted 
+   *C1* a short video demonstrating that it works on your system
+        * At the start of the video
+        - display the ifconfig of your system, by running the command $ifconfig
+        - then, demonstrate the program functionality
+   *C2* Relevant code files for (1) and (2)
+   *C3* Report for (3), (4) showing the flowchart starting from the user's invocation of sleep 
