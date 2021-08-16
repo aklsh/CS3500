@@ -60,24 +60,24 @@
     \put(0,0){\includegraphics[width=\unitlength,page=3]{memmap.pdf}}%
     \put(0.73535792,0.98481562){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}virtio Disk\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=4]{memmap.pdf}}%
-    \put(0.73535792,1.31453362){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}Boot ROM + RAM\end{tabular}}}}%
+    \put(0.73535792,1.34056399){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}RAM\\(kernel loaded here)\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=5]{memmap.pdf}}%
     \put(0.73535792,0.92407809){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}UART0\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=6]{memmap.pdf}}%
     \put(0.14967462,0.03470716){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}0x00001000\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=7]{memmap.pdf}}%
-    \put(0.14967462,0.55531453){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}0x0C00000\end{tabular}}}}%
+    \put(0.14967462,0.55531453){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}0x0C000000\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=8]{memmap.pdf}}%
-    \put(0.14967462,0.90238612){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}0x1000000\end{tabular}}}}%
+    \put(0.14967462,0.90238612){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}0x10000000\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=9]{memmap.pdf}}%
-    \put(0.14967462,0.94577007){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}0x1001000\end{tabular}}}}%
+    \put(0.14967462,0.94577007){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}0x10001000\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=10]{memmap.pdf}}%
-    \put(0.14967462,0.29501085){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}0x0200000\end{tabular}}}}%
+    \put(0.14967462,0.29501085){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}0x02000000\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=11]{memmap.pdf}}%
-    \put(0.14967462,1.2494577){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}0x8000000\end{tabular}}}}%
+    \put(0.14967462,1.2494577){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}0x80000000\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=12]{memmap.pdf}}%
     \put(0.73535792,0.07375271){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}QEMU Boot ROM\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=13]{memmap.pdf}}%
-    \put(0.14967462,1.37960954){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}0x8800000\end{tabular}}}}%
+    \put(0.14967462,1.37960954){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}0x88000000\end{tabular}}}}%
   \end{picture}%
 \endgroup%
