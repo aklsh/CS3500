@@ -48,7 +48,6 @@ uint64 sys_sleep(void){
 
   if(argint(0, &n) < 0)
     return -1;
-  printf("[KERNEL]: sleep for %d ticks\n", n);
   acquire(&tickslock);
   ticks0 = ticks;
   while(ticks - ticks0 < n){
@@ -79,4 +78,12 @@ uint64 sys_uptime(void){
   xticks = ticks;
   release(&tickslock);
   return xticks;
+}
+
+uint64 sys_echo_simple(void){
+  char argument[MAXARGLENGTH];
+  if(argstr(0, argument, MAXARGLENGTH) < 0)
+    return -1;
+  printf("%s\n", argument);
+  return 0;
 }
