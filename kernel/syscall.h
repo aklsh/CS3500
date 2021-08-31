@@ -21,3 +21,4 @@
 #define SYS_mkdir  20
 #define SYS_close  21
 #define SYS_echo_simple 22
+#define SYS_echo_kernel 23

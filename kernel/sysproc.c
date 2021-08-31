@@ -87,3 +87,23 @@ uint64 sys_echo_simple(void){
   printf("%s\n", argument);
   return 0;
 }
+
+uint64 sys_echo_kernel(void){
+  int argc;
+  char argument[MAXARGLENGTH+1]; // account for \0 in end.
+  char* terminator;
+  uint64 argv_base_addr;
+  uint64 arg_addr;
+
+  if((argint(0, &argc) < 0) || (argaddr(1, &argv_base_addr) < 0))
+    return -1;
+  argv_base_addr += sizeof(char*); // skip arg0 - name of program
+  for(int i = 1; i < argc; i++){
+    if((fetchaddr(argv_base_addr, &arg_addr) < 0) || (fetchstr(arg_addr, argument, MAXARGLENGTH) < 0))
+      return -1;
+    terminator = (i+1 < argc) ? " ":"\n";
+    printf("%s%s", argument, terminator);
+    argv_base_addr += sizeof(char*); // go to next argument starting address
+  }
+  return 0;
+}
