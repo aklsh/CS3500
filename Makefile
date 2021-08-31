@@ -119,6 +119,7 @@ UPROGS=\
 	$U/_zombie\
 	$U/_test_program_1\
 	$U/_test_program_2\
+	$U/_trace\
 
 fs.img: mkfs/mkfs README $(UPROGS)
 	mkfs/mkfs fs.img README $(UPROGS)

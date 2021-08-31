@@ -25,6 +25,7 @@ int sleep(int);
 int uptime(void);
 int echo_simple(char*);
 int echo_kernel(int, char**);
+int trace(int);
 
 // ulib.c
 int stat(const char*, struct stat*);
