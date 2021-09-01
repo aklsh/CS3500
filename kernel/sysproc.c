@@ -6,6 +6,7 @@
 #include "memlayout.h"
 #include "spinlock.h"
 #include "proc.h"
+#include "processinfo.h"
 
 uint64 sys_exit(void){
   int n;
@@ -81,38 +82,58 @@ uint64 sys_uptime(void){
 }
 
 uint64 sys_echo_simple(void){
-  char argument[MAXARGLENGTH];
-  if(argstr(0, argument, MAXARGLENGTH) < 0)
+  char argument[MAXARGLENGTH];              // argument can have max length of 128 char
+  if(argstr(0, argument, MAXARGLENGTH) < 0) // return error if no argument
     return -1;
-  printf("%s\n", argument);
+  printf("%s\n", argument);                 // print argument as string
   return 0;
 }
 
 uint64 sys_echo_kernel(void){
   int argc;
-  char argument[MAXARGLENGTH+1]; // account for \0 in end.
+  char argument[MAXARGLENGTH+1];          // account for \0 in end.
   char* terminator;
   uint64 argv_base_addr;
   uint64 arg_addr;
 
-  if((argint(0, &argc) < 0) || (argaddr(1, &argv_base_addr) < 0))
-    return -1;
-  argv_base_addr += sizeof(char*); // skip arg0 - name of program
+  if((argint(0, &argc) < 0) || (argaddr(1, &argv_base_addr) < 0)) 
+    return -1;                            // return error if no argument
+  argv_base_addr += sizeof(char*);        // skip arg0 - name of program
   for(int i = 1; i < argc; i++){
     if((fetchaddr(argv_base_addr, &arg_addr) < 0) || (fetchstr(arg_addr, argument, MAXARGLENGTH) < 0))
       return -1;
-    terminator = (i+1 < argc) ? " ":"\n";
-    printf("%s%s", argument, terminator);
-    argv_base_addr += sizeof(char*); // go to next argument starting address
+    printf("%s", argument);               // print argument
+    terminator = " ";
+    if(i+1 == argc)                       // check whether to print <space> or <newline>
+      terminator = "\n";
+    printf("%s", terminator);             // print terminator
+    argv_base_addr += sizeof(char*);      // go to next argument address
   }
   return 0;
 }
 
 uint64 sys_trace(void){
-  int mask;
+  int mask;                       // trace mask for process
   if(argint(0, &mask) < 0)
-    return -1;
+    return -1;                    // return if error
   struct proc *p = myproc();
-  p->trace_mask = (uint32) mask;
+  p->trace_mask = (uint32) mask;  // assign process trace mask
+  return 0;
+}
+
+uint64 sys_get_process_info(void){
+  struct processinfo info;
+  uint64 struct_pointer;
+  struct proc *p = myproc();
+
+  for(int i=0;i<16;i++)
+    info.name[i] = p->name[i];
+  info.pid = p->pid;
+  info.sz = p->sz;
+  
+  if(argaddr(0, &struct_pointer) < 0)
+    return -1;
+  if(copyout(p->pagetable, struct_pointer, (char*) &info, sizeof(info)) < 0)
+    return -1;
   return 0;
 }

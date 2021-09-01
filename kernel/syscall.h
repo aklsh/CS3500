@@ -23,3 +23,4 @@
 #define SYS_echo_simple 22
 #define SYS_echo_kernel 23
 #define SYS_trace 24
+#define SYS_get_process_info 25
