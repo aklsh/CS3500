@@ -117,7 +117,7 @@ uint64 sys_trace(void){
   if(argint(0, &mask) < 0)
     return -1;                    // return if error
   struct proc *p = myproc();
-  p->trace_mask = (uint32) mask;  // assign process trace mask
+  p->trace_mask = mask;           // assign process trace mask
   return 0;
 }
 

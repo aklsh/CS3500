@@ -13,6 +13,6 @@ int main(int argc, char* argv[]){
     get_process_info(&info);
   printf("Process ID -> %d\n", info.pid);
   printf("Process Name -> %s\n", info.name);
-  printf("Memory size -> %d\n", info.sz);
+  printf("Memory size -> %d Bytes\n", info.sz);
   exit(0);
 }

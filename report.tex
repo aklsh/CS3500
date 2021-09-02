@@ -76,7 +76,7 @@
 
 \section*{Problem 1}
 \begin{colorboxed}{Code}{\texttt{kernel/sysproc.c::\textit{sys\_echo\_simple()}}}{unbreakable}
-    \inputminted[baselinestretch=0.85,firstline=83,lastline=89,breaklines]{c}{kernel/sysproc.c}
+    \inputminted[baselinestretch=0.85,firstline=84,lastline=90,breaklines]{c}{kernel/sysproc.c}
 \end{colorboxed}
 \subsection*{Approach}
 \begin{itemize}[noitemsep, nolistsep]
@@ -85,24 +85,38 @@
 \end{itemize}
 \section*{Problem 2}
 \begin{colorboxed}{Code}{\texttt{kernel/sysproc.c::\textit{sys\_echo\_kernel()}}}{unbreakable}
-    \inputminted[baselinestretch=0.85,firstline=91,lastline=112,breaklines]{c}{kernel/sysproc.c}
+    \inputminted[baselinestretch=0.85,firstline=92,lastline=113,breaklines]{c}{kernel/sysproc.c}
 \end{colorboxed}
 \subsection*{Approach}
 \begin{itemize}[noitemsep, nolistsep]
-    \item Get string at \texttt{arg\_addr} (\texttt{user/test\_program\_2.c}) using \texttt{argstr()} as a \textit{string}.
+    \item Get string at \texttt{argv\_base\_addr} (\texttt{user/test\_program\_2.c}) using \texttt{argstr()} as a \textit{string}.
     \item Use \texttt{printf()} to print the argument to \texttt{STDOUT}.
-    \item Increment \texttt{arg\_addr} by \texttt{sizeof(char*)} and go to next argument.
+    \item Increment \texttt{argv\_base\_addr} by \texttt{sizeof(char*)} and go to next argument.
 \end{itemize}
 \section*{Problem 3}
 \begin{colorboxed}{Code}{\texttt{kernel/sysproc.c::\textit{sys\_trace()}}}{unbreakable}
-    \inputminted[baselinestretch=0.85,firstline=114,lastline=120,breaklines]{c}{kernel/sysproc.c}
+    \inputminted[baselinestretch=0.85,firstline=115,lastline=122,breaklines]{c}{kernel/sysproc.c}
 \end{colorboxed}
 \begin{colorboxed}{Code}{\texttt{kernel/syscall.c::\textit{syscall()}}}{unbreakable}
-    \inputminted[baselinestretch=0.85,firstline=153,lastline=170,breaklines]{c}{kernel/syscall.c}
+    \inputminted[baselinestretch=0.85,firstline=156,lastline=175,breaklines]{c}{kernel/syscall.c}
 \end{colorboxed}
 \subsection*{Approach}
+\begin{itemize}[noitemsep, nolistsep]
+    \item sldkfkj
+\end{itemize}
 \section*{Problem 4}
+\subsection*{Approach}
+\begin{itemize}[noitemsep, nolistsep]
+    \item sldkfkj
+\end{itemize}
 \section*{Problem 5}
+\begin{colorboxed}{Code}{\texttt{kernel/sysproc.c::\textit{sys\_get\_process\_info()}}}{unbreakable}
+    \inputminted[baselinestretch=0.85,firstline=124,lastline=139,breaklines]{c}{kernel/sysproc.c}
+\end{colorboxed}
+\subsection*{Approach}
+\begin{itemize}[noitemsep, nolistsep]
+    \item sldkfkj
+\end{itemize}
 
 %%Beginning References. Don't add any text beyond this.
 %%------------------------------------------
