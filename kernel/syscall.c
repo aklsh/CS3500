@@ -155,19 +155,19 @@ static uint64 (*syscalls[])(void) = {
 
 void syscall(void){
   int num;
-  uint32 mask;
   struct proc *p = myproc();
 
   num = p->trapframe->a7;                               // get syscall number
-  if(num > 0 && num < NELEM(syscalls) && syscalls[num]) // sanity checks
+  if(num > 0 && num < NELEM(syscalls) && syscalls[num]){ // sanity checks
+    if(p->trace_mask & (1 << num))          // check if corresponding bit is set in trace mask
+      printf("PID: %d, Syscall Name: %s, ", p->pid, syscall_names[num]);
     p->trapframe->a0 = syscalls[num]();                 // call syscall if checks pass
+    if(p->trace_mask & (1 << num))          // check if corresponding bit is set in trace mask
+      printf("Return Value: %d\n", p->trapframe->a0);
+  }
   else{                                                 // return error if not
     printf("%d %s: unknown sys call %d\n",
             p->pid, p->name, num);
     p->trapframe->a0 = -1;
   }
-  mask = p->trace_mask;            // get process trace mask
-  if(num & (1 << num))             // check if corresponding bit is set in trace mask
-    printf("%d: syscall %s -> %d\n", 
-            p->pid, syscall_names[num], p->trapframe->a0);
 }

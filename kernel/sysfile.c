@@ -50,10 +50,13 @@ static int fdalloc(struct file *f){
 
 uint64 sys_dup(void){
   struct file *f;
-  int fd;
+  int fd, n;
 
-  if(argfd(0, 0, &f) < 0)
+  if((argfd(0, 0, &f) < 0) || (argint(0, &n) < 0))
     return -1;
+  if(myproc()->trace_mask & (1<<10))
+    printf("Args: %d, ", 
+            n);
   if((fd=fdalloc(f)) < 0)
     return -1;
   filedup(f);
@@ -62,32 +65,42 @@ uint64 sys_dup(void){
 
 uint64 sys_read(void){
   struct file *f;
-  int n;
-  uint64 p;
+  int n, l;
+  uint64 k;
 
-  if(argfd(0, 0, &f) < 0 || argint(2, &n) < 0 || argaddr(1, &p) < 0)
+  if(argfd(0, 0, &f) < 0 || argint(2, &n) < 0 || argaddr(1, &k) < 0 || argint(0, &l) < 0)
     return -1;
-  return fileread(f, p, n);
+  if(myproc()->trace_mask & (1<<5))
+    printf("Args: %d,%p,%d, ", 
+            l, k, n);
+  return fileread(f, k, n);
 }
 
 uint64 sys_write(void){
   struct file *f;
-  int n;
-  uint64 p;
+  int n, l;
+  uint64 k;
 
-  if(argfd(0, 0, &f) < 0 || argint(2, &n) < 0 || argaddr(1, &p) < 0)
+  if(argfd(0, 0, &f) < 0 || argint(2, &n) < 0 || argaddr(1, &k) < 0 || argint(0, &l) < 0)
     return -1;
+  if(myproc()->trace_mask & (1<<16))
+    printf("Args: %d,%p,%d, ", 
+            l, k, n);
 
-  return filewrite(f, p, n);
+  return filewrite(f, k, n);
 }
 
 uint64 sys_close(void){
-  int fd;
+  int fd, n;
   struct file *f;
+  struct proc *p = myproc();
 
-  if(argfd(0, &fd, &f) < 0)
+  if(argfd(0, &fd, &f) < 0 || argint(0, &n) < 0)
     return -1;
-  myproc()->ofile[fd] = 0;
+  if(p->trace_mask & (1<<21))
+    printf("Args: %d, ", 
+            n);
+  p->ofile[fd] = 0;
   fileclose(f);
   return 0;
 }
@@ -95,9 +108,13 @@ uint64 sys_close(void){
 uint64 sys_fstat(void){
   struct file *f;
   uint64 st; // user pointer to struct stat
+  int n;
 
-  if(argfd(0, 0, &f) < 0 || argaddr(1, &st) < 0)
+  if(argfd(0, 0, &f) < 0 || argaddr(1, &st) < 0 || argint(0, &n) < 0)
     return -1;
+  if(myproc()->trace_mask & (1<<8))
+    printf("Args: %d,%p, ", 
+            n, st);
   return filestat(f, st);
 }
 
@@ -109,6 +126,9 @@ uint64 sys_link(void){
   if(argstr(0, old, MAXPATH) < 0 || argstr(1, new, MAXPATH) < 0)
     return -1;
 
+  if(myproc()->trace_mask & (1<<19))
+    printf("Args: %s,%s, ", 
+            old, new);
   begin_op();
   if((ip = namei(old)) == 0){
     end_op();
@@ -171,7 +191,9 @@ uint64 sys_unlink(void){
 
   if(argstr(0, path, MAXPATH) < 0)
     return -1;
-
+  if(myproc()->trace_mask & (1<<18))
+    printf("Args: %s, ", 
+            path);
   begin_op();
   if((dp = nameiparent(path, name)) == 0){
     end_op();
@@ -271,6 +293,10 @@ uint64 sys_open(void){
   if((n = argstr(0, path, MAXPATH)) < 0 || argint(1, &omode) < 0)
     return -1;
 
+  if(myproc()->trace_mask & (1<<15))
+    printf("Args: %s,%d, ", 
+            path, omode);
+
   begin_op();
 
   if(omode & O_CREATE){
@@ -336,6 +362,9 @@ uint64 sys_mkdir(void){
     end_op();
     return -1;
   }
+  if(myproc()->trace_mask & (1<<20))
+    printf("Args: %s, ", 
+            path);
   iunlockput(ip);
   end_op();
   return 0;
@@ -347,13 +376,13 @@ uint64 sys_mknod(void){
   int major, minor;
 
   begin_op();
-  if((argstr(0, path, MAXPATH)) < 0 ||
-     argint(1, &major) < 0 ||
-     argint(2, &minor) < 0 ||
-     (ip = create(path, T_DEVICE, major, minor)) == 0){
+  if((argstr(0, path, MAXPATH)) < 0 || argint(1, &major) < 0 || argint(2, &minor) < 0 || (ip = create(path, T_DEVICE, major, minor)) == 0){
     end_op();
     return -1;
   }
+  if(myproc()->trace_mask & (1<<17))
+    printf("Args: %s,%d,%d, ", 
+            path, major, minor);
   iunlockput(ip);
   end_op();
   return 0;
@@ -369,6 +398,9 @@ uint64 sys_chdir(void){
     end_op();
     return -1;
   }
+  if(p->trace_mask & (1<<9))
+    printf("Args: %s, ", 
+            path);
   ilock(ip);
   if(ip->type != T_DIR){
     iunlockput(ip);
@@ -390,6 +422,9 @@ uint64 sys_exec(void){
   if(argstr(0, path, MAXPATH) < 0 || argaddr(1, &uargv) < 0){
     return -1;
   }
+  if(myproc()->trace_mask & (1<<7))
+    printf("Args: %s,%p, ", 
+            path, uargv);
   memset(argv, 0, sizeof(argv));
   for(i=0;; i++){
     if(i >= NELEM(argv)){
@@ -430,6 +465,9 @@ uint64 sys_pipe(void){
 
   if(argaddr(0, &fdarray) < 0)
     return -1;
+  if(p->trace_mask & (1<<4))
+    printf("Args: %d, ", 
+            fdarray);
   if(pipealloc(&rf, &wf) < 0)
     return -1;
   fd0 = -1;

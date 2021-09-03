@@ -12,34 +12,49 @@ uint64 sys_exit(void){
   int n;
   if(argint(0, &n) < 0)
     return -1;
+  if(myproc()->trace_mask & (1<<2))
+    printf("Args: %d\n", 
+            n);
   exit(n);
   return 0;  // not reached
 }
 
 uint64 sys_getpid(void){
-  return myproc()->pid;
+  struct proc *p = myproc();
+  if(p->trace_mask & (1<<11))
+    printf("Args: <none>, ");
+  return p->pid;
 }
 
 uint64 sys_fork(void){
+  if(myproc()->trace_mask & (1<<1))
+    printf("Args: <none>, ");
   return fork();
 }
 
 uint64 sys_wait(void){
-  uint64 p;
-  if(argaddr(0, &p) < 0)
+  uint64 n;
+  if(argaddr(0, &n) < 0)
     return -1;
-  return wait(p);
+  if(myproc()->trace_mask & (1<<3))
+    printf("Args: %dv ", 
+            n);
+  return wait(n);
 }
 
 uint64 sys_sbrk(void){
   int addr;
   int n;
+  struct proc *p = myproc();
 
   if(argint(0, &n) < 0)
     return -1;
-  addr = myproc()->sz;
+  addr = p->sz;
   if(growproc(n) < 0)
     return -1;
+  if(p->trace_mask & (1<<12))
+    printf("Args: %d, ", 
+            n);
   return addr;
 }
 
@@ -59,14 +74,21 @@ uint64 sys_sleep(void){
     sleep(&ticks, &tickslock);
   }
   release(&tickslock);
+  if(myproc()->trace_mask & (1<<13))
+    printf("Args: %d, ", 
+            n);
   return 0;
 }
 
 uint64 sys_kill(void){
   int pid;
+  struct proc *p = myproc();
 
   if(argint(0, &pid) < 0)
     return -1;
+  if(p->trace_mask & (1<<6))
+    printf("Args: %d, ", 
+            pid);
   return kill(pid);
 }
 
@@ -78,6 +100,8 @@ uint64 sys_uptime(void){
   acquire(&tickslock);
   xticks = ticks;
   release(&tickslock);
+  if(myproc()->trace_mask & (1<<14))
+    printf("Args: <none>, ");
   return xticks;
 }
 
@@ -85,6 +109,9 @@ uint64 sys_echo_simple(void){
   char argument[MAXARGLENGTH];              // argument can have max length of 128 char
   if(argstr(0, argument, MAXARGLENGTH) < 0) // return error if no argument
     return -1;
+  if(myproc()->trace_mask & (1<<22))
+    printf("Args: %s, ", 
+            argument);
   printf("%s\n", argument);                 // print argument as string
   return 0;
 }
@@ -98,6 +125,9 @@ uint64 sys_echo_kernel(void){
 
   if((argint(0, &argc) < 0) || (argaddr(1, &argv_base_addr) < 0)) 
     return -1;                            // return error if no argument
+  if(myproc()->trace_mask & (1<<23))
+    printf("Args: %d,%p ", 
+            argc, argv_base_addr);
   argv_base_addr += sizeof(char*);        // skip arg0 - name of program
   for(int i = 1; i < argc; i++){
     if((fetchaddr(argv_base_addr, &arg_addr) < 0) || (fetchstr(arg_addr, argument, MAXARGLENGTH) < 0))
@@ -118,12 +148,15 @@ uint64 sys_trace(void){
     return -1;                    // return if error
   struct proc *p = myproc();
   p->trace_mask = mask;           // assign process trace mask
+  if(mask & (1<<24))
+    printf("PID: %d, Syscall Name: trace, Args: %d, ", 
+            p->pid, mask);
   return 0;
 }
 
 uint64 sys_get_process_info(void){
   struct processinfo info;
-  uint64 struct_pointer;
+  uint64 destination;
   struct proc *p = myproc();
 
   for(int i=0;i<16;i++)
@@ -131,9 +164,12 @@ uint64 sys_get_process_info(void){
   info.pid = p->pid;
   info.sz = p->sz;
   
-  if(argaddr(0, &struct_pointer) < 0)
+  if(argaddr(0, &destination) < 0)
     return -1;
-  if(copyout(p->pagetable, struct_pointer, (char*) &info, sizeof(info)) < 0)
+  if(copyout(p->pagetable, destination, (char*) &info, sizeof(info)) < 0)
     return -1;
+  if(p->trace_mask & (1<<25))
+    printf("Args: %p, ", 
+            destination);
   return 0;
 }

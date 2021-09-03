@@ -128,7 +128,7 @@ fs.img: mkfs/mkfs README $(UPROGS)
 -include kernel/*.d user/*.d
 
 clean: 
-	rm -f *.dvi *.idx *.aux *.log *.ind *.ilg \
+	rm -f *.dvi *.idx *.aux *.log *.ind *.ilg *.fdb_latexmk *.fls *.synctex.gz \
 	*/*.o */*.d */*.asm */*.sym \
 	$U/initcode $U/initcode.out $K/kernel fs.img \
 	mkfs/mkfs .gdbinit \
