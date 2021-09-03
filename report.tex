@@ -76,7 +76,7 @@
 
 \section*{Problem 1}
 \begin{colorboxed}{Code}{\texttt{kernel/sysproc.c::\textit{sys\_echo\_simple()}}}{unbreakable}
-    \inputminted[baselinestretch=0.85,firstline=84,lastline=90,breaklines]{c}{kernel/sysproc.c}
+    \inputminted[baselinestretch=0.85,firstline=108,lastline=117,breaklines]{c}{kernel/sysproc.c}
 \end{colorboxed}
 \subsection*{Approach}
 \begin{itemize}[noitemsep, nolistsep]
@@ -84,8 +84,8 @@
     \item Use \texttt{printf()} to print the argument to \texttt{STDOUT}.
 \end{itemize}
 \section*{Problem 2}
-\begin{colorboxed}{Code}{\texttt{kernel/sysproc.c::\textit{sys\_echo\_kernel()}}}{unbreakable}
-    \inputminted[baselinestretch=0.85,firstline=92,lastline=113,breaklines]{c}{kernel/sysproc.c}
+\begin{colorboxed}{Code}{\texttt{kernel/sysproc.c::\textit{sys\_echo\_kernel()}}}{breakable}
+    \inputminted[baselinestretch=0.85,firstline=119,lastline=143,breaklines]{c}{kernel/sysproc.c}
 \end{colorboxed}
 \subsection*{Approach}
 \begin{itemize}[noitemsep, nolistsep]
@@ -93,25 +93,28 @@
     \item Use \texttt{printf()} to print the argument to \texttt{STDOUT}.
     \item Increment \texttt{argv\_base\_addr} by \texttt{sizeof(char*)} and go to next argument.
 \end{itemize}
-\section*{Problem 3}
+\section*{Problem 3 and 4}
 \begin{colorboxed}{Code}{\texttt{kernel/sysproc.c::\textit{sys\_trace()}}}{unbreakable}
-    \inputminted[baselinestretch=0.85,firstline=115,lastline=122,breaklines]{c}{kernel/sysproc.c}
+    \inputminted[baselinestretch=0.85,firstline=145,lastline=155,breaklines]{c}{kernel/sysproc.c}
 \end{colorboxed}
 \begin{colorboxed}{Code}{\texttt{kernel/syscall.c::\textit{syscall()}}}{unbreakable}
     \inputminted[baselinestretch=0.85,firstline=156,lastline=175,breaklines]{c}{kernel/syscall.c}
 \end{colorboxed}
-\subsection*{Approach}
+\subsection*{Approach for Problem 3}
 \begin{itemize}[noitemsep, nolistsep]
-    \item sldkfkj
+    \item
 \end{itemize}
-\section*{Problem 4}
-\subsection*{Approach}
+\subsection*{Approach for Problem 4}
 \begin{itemize}[noitemsep, nolistsep]
-    \item sldkfkj
+    \item Get type of syscall from process's \texttt{a7} register.
+    \item Check if the process's trace mask is enabled for the syscall and print \texttt{PID} and \texttt{name} for the syscall using \texttt{pid} and \texttt{name} fields in \texttt{proc} structure.
+    \item Call appropriate syscall routine.
+    \item Get arguments of the syscall using appropriate helper functions like \texttt{argint}, \texttt{argaddr} and \texttt{argstr} and print them if process's trace mask has current syscall enabled. \textit{This is done inside each syscall routine}.
+    \item Return from syscall routine and extract the \texttt{return value} from the process's \texttt{a0} register. Print if necessary.
 \end{itemize}
 \section*{Problem 5}
 \begin{colorboxed}{Code}{\texttt{kernel/sysproc.c::\textit{sys\_get\_process\_info()}}}{unbreakable}
-    \inputminted[baselinestretch=0.85,firstline=124,lastline=139,breaklines]{c}{kernel/sysproc.c}
+    \inputminted[baselinestretch=0.85,firstline=157,breaklines]{c}{kernel/sysproc.c}
 \end{colorboxed}
 \begin{colorboxed}{Code}{\texttt{user/test\_program\_5.c::\textit{main()}}}{unbreakable}
     \inputminted[baselinestretch=0.85,firstline=1,lastline=19,breaklines]{c}{user/test_program_5.c}
