@@ -89,9 +89,11 @@
 \end{colorboxed}
 \subsection*{Approach}
 \begin{itemize}[noitemsep, nolistsep]
-    \item Get string at \texttt{argv\_base\_addr} (\texttt{user/test\_program\_2.c}) using \texttt{argstr()} as a \textit{string}.
+    \item Get address of argument (\texttt{arg\_addr}) to print, from location \texttt{argv\_base\_addr} using \texttt{argaddr()}.
+    \item Get string argument located at \texttt{arg\_addr} using \texttt{fetchstr()}. \textit{Note that \texttt{fetchstr()} requires the length of the string also to be passed. This is done with help of a fixed maximum length of \texttt{MAXARGLENGTH} }.
     \item Use \texttt{printf()} to print the argument to \texttt{STDOUT}.
     \item Increment \texttt{argv\_base\_addr} by \texttt{sizeof(char*)} and go to next argument.
+    \item Repeat for \texttt{argc}$-1$ number of times (as argc includes program name also in count.)
 \end{itemize}
 \section*{Problem 3 and 4}
 \begin{colorboxed}{Code}{\texttt{kernel/sysproc.c::\textit{sys\_trace()}}}{unbreakable}
@@ -100,11 +102,7 @@
 \begin{colorboxed}{Code}{\texttt{kernel/syscall.c::\textit{syscall()}}}{unbreakable}
     \inputminted[baselinestretch=0.85,firstline=156,lastline=175,breaklines]{c}{kernel/syscall.c}
 \end{colorboxed}
-\subsection*{Approach for Problem 3}
-\begin{itemize}[noitemsep, nolistsep]
-    \item
-\end{itemize}
-\subsection*{Approach for Problem 4}
+\subsection*{Approach}
 \begin{itemize}[noitemsep, nolistsep]
     \item Get type of syscall from process's \texttt{a7} register.
     \item Check if the process's trace mask is enabled for the syscall and print \texttt{PID} and \texttt{name} for the syscall using \texttt{pid} and \texttt{name} fields in \texttt{proc} structure.
@@ -121,7 +119,10 @@
 \end{colorboxed}
 \subsection*{Approach}
 \begin{itemize}[noitemsep, nolistsep]
-    \item sldkfkj
+    \item Initialise a variable of type \texttt{struct processinfo} in the user program.
+    \item Call the system call, with the address of this variable as it's argument.
+    \item Extract \texttt{PID}, \texttt{name} and \texttt{size} of process from the \texttt{pid}, \texttt{name} and \texttt{sz} fields of the \texttt{proc} structure respectively and use them to fill a temporary \texttt{struct processinfo}.
+    \item Using \texttt{copyout}, we transfer \texttt{sizeof(struct processinfo)} bytes from the kernel space to the user space. The data will be copied to a location with a base address of \texttt{destination} (address of \texttt{struct processinfo} in user space).
 \end{itemize}
 
 %%Beginning References. Don't add any text beyond this.
