@@ -117,6 +117,10 @@ UPROGS=\
 	$U/_grind\
 	$U/_wc\
 	$U/_zombie\
+	$U/_test_program_1\
+	$U/_test_program_2\
+	$U/_trace\
+	$U/_test_program_5\
 
 fs.img: mkfs/mkfs README $(UPROGS)
 	mkfs/mkfs fs.img README $(UPROGS)
@@ -124,12 +128,13 @@ fs.img: mkfs/mkfs README $(UPROGS)
 -include kernel/*.d user/*.d
 
 clean: 
-	rm -f *.dvi *.idx *.aux *.log *.ind *.ilg \
+	rm -f *.dvi *.idx *.aux *.log *.ind *.ilg *.fdb_latexmk *.fls *.synctex.gz \
 	*/*.o */*.d */*.asm */*.sym \
 	$U/initcode $U/initcode.out $K/kernel fs.img \
 	mkfs/mkfs .gdbinit \
         $U/usys.S \
 	$(UPROGS)
+	rm -rf _minted-report/
 
 # try to generate a unique GDB port
 GDBPORT = $(shell expr `id -u` % 5000 + 25000)
