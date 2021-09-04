@@ -1,0 +1,85 @@
+\documentclass[11pt,a4paper,english]{paper} 
+\usepackage{fontspec}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=2cm]{geometry}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{bm}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{booktabs}
+\usepackage{fancyhdr}
+\usepackage[most]{tcolorbox}
+\usepackage[authoryear]{natbib}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{eucal}
+\usepackage[]{minted}
+\usepackage{enumitem}
+\usepackage{latexsym}
+\usepackage{indentfirst}
+\usepackage[english]{babel}
+\usepackage[autostyle, english = american]{csquotes}
+\usepackage{titlesec}
+
+\titleformat*{\section}{\LARGE\bfseries}
+\titleformat*{\subsection}{\Large\bfseries}
+\titleformat*{\subsubsection}{\large}
+\MakeOuterQuote{"}
+
+\setmonofont[Scale=0.75]{Hack NF}
+
+\def \courseNumber {CS3500}
+\def \courseName {Operating Systems}
+\def \assignmentName {<Lab Name>}
+\def \myName {Akilesh Kannan}
+\def \rollNumber {EE18B122}
+
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{\assignmentName}
+\lhead{\courseNumber: \courseName}
+\cfoot{\thepage}
+
+\linespread{1.2}
+
+\renewcommand{\familydefault}{\sfdefault} %command to change font to sans-serif
+
+\definecolor{blue(ryb)}{rgb}{0.01, 0.28, 1.0}
+\definecolor{green(ryb)}{rgb}{0.28, 1.0, 0.01}
+\definecolor{red(ryb)}{rgb}{1.0, 0.01, 0.28}
+\definecolor{black(ryb)}{rgb}{0, 0, 0}
+\definecolor{gray(ryb)}{rgb}{0.75, 0.75, 0.75}
+
+\newenvironment{colorboxed}[4][gray]{
+\begin{tcolorbox}[colback=#1!3!white,colframe=#1(ryb)!50!black,title=\textbf{#2: #3},#4]
+}{
+\end{tcolorbox}
+}
+
+\begin{document} 
+\thispagestyle{empty}
+\vspace{-4.5cm}
+
+\hspace*{-\parindent}
+\begin{minipage}{0.65\textwidth}
+{\fontsize{22pt}{10pt}\selectfont\textbf{\assignmentName}}\\[1mm]
+\Large
+\textit{\courseNumber: \courseName}\\[5mm]
+\Large \myName \\
+\normalsize \rollNumber \\
+\end{minipage}\hfill% push everything to the right
+\raisebox{-13mm}{\includegraphics[scale=.28]{logo.pdf}}
+
+\hrule \hrule
+\medskip
+\vspace{-0.2cm}
+
+
+%%Beginning References. Don't add any text beyond this.
+%%------------------------------------------
+
+%\newpage %sending References to the last page
+
+%\bibliography{paper}
+%\bibliographystyle{apalike}
+\end{document}
