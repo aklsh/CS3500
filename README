@@ -67,3 +67,11 @@ Note:
     * Steal code from uvmalloc() in vm.c, which is what sbrk()calls(via growproc()). You’ll need to call kalloc() and mappages(). 
     * Use PGROUNDDOWN(va) to round the faulting virtual address down to a page boundary. 
     * uvmunmap() will panic; modify it to not panic if some pages aren’t mapped.
+
+Submission
+----------
+* The assignment should be done individually.
+* The following artifacts need to submitted:
+    - Video: demonstrating that it works on your system. At the start of the video display the ifconfig of your system, by running the command $ifconfig and then, demonstrate the program functionality.
+    - Code files: Run make clean and zip the entire xv6-riscv repo, containing your solution.
+    - Report: Explain the steps you followed to solve each problem.
