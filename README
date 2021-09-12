@@ -52,6 +52,7 @@ Eliminate allocation from sbrk() (10 marks)
 
 Lazy allocation (10 marks) 
 --------------------------
+
 * Modify the code in trap.c to respond to a page fault from user space by mapping a newly-allocated page of physical memory at the faulting address, and then returning back to user space to let the process continue executing. 
 * You should add your code just before the printf call that produced the ”usertrap() : ...” message so that when you call echo hi it should be able to allocate new page. 
 * Sample Output 
@@ -70,6 +71,7 @@ Note:
 
 Submission
 ----------
+
 * The assignment should be done individually.
 * The following artifacts need to submitted:
     - Video: demonstrating that it works on your system. At the start of the video display the ifconfig of your system, by running the command $ifconfig and then, demonstrate the program functionality.
