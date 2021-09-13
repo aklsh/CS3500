@@ -87,6 +87,12 @@
     \item Call \texttt{vmprint()} with argument as page table with base address of current page table entry. Increment \texttt{level} before calling, and decrement \texttt{level} after returning.
 \end{itemize}
 
+\section{Problem 2}
+\begin{colorboxed}{Code}{\texttt{kernel/proc.c::growproc()}}{unbreakable}
+    \inputminted[baselinestretch=0.85,firstline=232,lastline=248,breaklines]{c}{kernel/proc.c}
+\end{colorboxed}
+\subsection{Approach}
+Comment out/remove the lines in \texttt{growproc(n)} that allocate/deallocate memory using \texttt{uvmalloc()}/\texttt{uvdemalloc()} respectively. Increase size of process by adding \texttt{n} to \texttt{p->sz}.
 %%Beginning References. Don't add any text beyond this.
 %%------------------------------------------
 
