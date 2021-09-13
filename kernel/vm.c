@@ -391,3 +391,26 @@ int copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max){
     return -1;
   }
 }
+
+// Print page table entries
+void vmprint(pagetable_t pagetable){
+  static int level=0; // Translation level
+  if(level==0){
+    printf("page table %p\n", pagetable);
+    level+=1;
+  }
+  for(int i=0;i<512;i++){
+    pte_t pte = pagetable[i];
+    if((pte & PTE_V)){
+      for(int k=0;k<level;k++)  // print .. for indentation
+        printf("..");
+      printf("%d: pte %p pa %p\n", i, pte, (unsigned long)PTE2PA(pte)); // print entry and addr
+      if((pte & (PTE_R|PTE_W|PTE_X))==0){ // check if there's a next level
+        uint64 child = PTE2PA(pte);
+        level+=1;
+        vmprint((pagetable_t)child);
+        level-=1;
+      }
+    }
+  }
+}
