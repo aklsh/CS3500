@@ -74,6 +74,19 @@
 \medskip
 \vspace{-0.2cm}
 
+\section{Problem 1}
+\begin{colorboxed}{Code}{\texttt{kernel/vm.c::vmprint()}}{unbreakable}
+    \inputminted[baselinestretch=0.85,firstline=395,breaklines]{c}{kernel/vm.c}
+\end{colorboxed}
+
+\subsection{Approach}
+\begin{itemize}[noitemsep, nolistsep]
+    \item Use a static variable \texttt{level} to store the current page table's level (1, 2 or 3).
+    \item Given a page table's base address, iterate through the page table and print all valid entries (check if LSB is set), and their corresponding physical address. Indent with \texttt{..}, printed \texttt{level} times.
+    \item Check if there's a next level by checking the permission bits (R, W, X) in the page table entry - if they are all 0s, then there is a next level.
+    \item Call \texttt{vmprint()} with argument as page table with base address of current page table entry. Increment \texttt{level} before calling, and decrement \texttt{level} after returning.
+\end{itemize}
+
 \newpage
 
 \noindent ak;sdj
