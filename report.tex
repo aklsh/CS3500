@@ -93,6 +93,37 @@
 \end{colorboxed}
 \subsection{Approach}
 Comment out/remove the lines in \texttt{growproc(n)} that allocate/deallocate memory using \texttt{uvmalloc()}/\texttt{uvdemalloc()} respectively. Increase size of process by adding \texttt{n} to \texttt{p->sz}.
+
+\section{Problem 3}
+\begin{colorboxed}{Code}{\texttt{kernel/trap.c::usertrap()}}{unbreakable}
+
+    \begin{minted}[baselinestretch=0.85, breaklines]{c}
+void usertrap(void){
+  ...
+  ...
+    \end{minted}
+    \vspace{-7.5mm}
+    \inputminted[baselinestretch=0.85, breaklines, firstline=65, lastline=76]{c}{kernel/trap.c}
+    \vspace{-8.5mm}
+    \begin{minted}[baselinestretch=0.85, breaklines]{c}
+  ...
+  ...
+}
+    \end{minted}
+\end{colorboxed}
+
+\begin{colorboxed}{Code}{\texttt{kernel/vm.c::uvmunmap()}}{unbreakable}
+    \inputminted[baselinestretch=0.85,firstline=148,lastline=168,breaklines]{c}{kernel/vm.c}
+\end{colorboxed}
+
+\subsection{Approach}
+\begin{itemize}[nolistsep,noitemsep]
+    \item In \texttt{usertrap()}, check if the exception is raised due to page fault (load-13/store-15), using the value stored in \texttt{SCAUSE} register.
+    \item If it is a page fault, get the faulting virtual address (\texttt{va}) from \texttt{STVAL} register.
+    \item Allocate a single page (4096 bytes) using \texttt{kalloc()}, and map it to the process's pagetable, after aligning it to a 4096-byte boundary with starting address at \texttt{PGROUNDDOWN(va)}.
+    \item To prevent kernel panics caused by "freeing pages that have not yet been mapped", we remove the check for a valid page in \texttt{uvmunmap()}.
+
+\end{itemize}
 %%Beginning References. Don't add any text beyond this.
 %%------------------------------------------
 

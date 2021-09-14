@@ -65,7 +65,7 @@ Note:
     * You will find some additional problems that have to be solved to make it work correctly 
     * You can check whether a fault is a page fault by seeing if r_scause() is 13 or 15 in usertrap(). 
     * Look at the arguments to the printf() in usertrap() that reports the page fault, in order to see how to find the virtual address that caused the page fault. 
-    * Steal code from uvmalloc() in vm.c, which is what sbrk()calls(via growproc()). You’ll need to call kalloc() and mappages(). 
+    * Steal code from uvmalloc() in vm.c, which is what sbrk() calls(via growproc()). You’ll need to call kalloc() and mappages(). 
     * Use PGROUNDDOWN(va) to round the faulting virtual address down to a page boundary. 
     * uvmunmap() will panic; modify it to not panic if some pages aren’t mapped.
 
