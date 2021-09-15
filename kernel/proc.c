@@ -96,6 +96,9 @@ int allocpid(){
 static struct proc* allocproc(void){
   struct proc *p;
 
+  // check for an unused process
+  // if not found, return 0, meaning
+  // all NPROC processes are used
   for(p = proc; p < &proc[NPROC]; p++) {
     acquire(&p->lock);
     if(p->state == UNUSED) {
