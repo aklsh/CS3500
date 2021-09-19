@@ -89,10 +89,13 @@
 
 \section{Problem 2}
 \begin{colorboxed}{Code}{\texttt{kernel/proc.c::growproc()}}{unbreakable}
-    \inputminted[baselinestretch=0.85,firstline=232,lastline=248,breaklines]{c}{kernel/proc.c}
+    \inputminted[baselinestretch=0.85,firstline=235,lastline=251,breaklines]{c}{kernel/proc.c}
 \end{colorboxed}
 \subsection{Approach}
-Comment out/remove the lines in \texttt{growproc(n)} that allocate/deallocate memory using \texttt{uvmalloc()}/\texttt{uvdemalloc()} respectively. Increase size of process by adding \texttt{n} to \texttt{p->sz}.
+\begin{itemize}[noitemsep, nolistsep]
+    \item Comment out/remove the lines in \texttt{growproc(n)} that allocate/deallocate memory using \texttt{uvmalloc()}/\texttt{uvdemalloc()} respectively. Increase size of process by adding \texttt{n} to \texttt{p->sz}.
+    \item Print \texttt{a} and \texttt{*pte} in \texttt{uvmunmap()}, when it panics due to unmapped memory.
+\end{itemize}
 
 \section{Problem 3}
 \begin{colorboxed}{Code}{\texttt{kernel/trap.c::usertrap()}}{unbreakable}
@@ -113,7 +116,7 @@ void usertrap(void){
 \end{colorboxed}
 
 \begin{colorboxed}{Code}{\texttt{kernel/vm.c::uvmunmap()}}{unbreakable}
-    \inputminted[baselinestretch=0.85,firstline=148,lastline=168,breaklines]{c}{kernel/vm.c}
+    \inputminted[baselinestretch=0.85,firstline=148,lastline=169,breaklines]{c}{kernel/vm.c}
 \end{colorboxed}
 
 \subsection{Approach}
