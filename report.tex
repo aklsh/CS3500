@@ -1,85 +1,229 @@
-\documentclass[11pt,a4paper,english]{paper} 
-\usepackage{fontspec}
+\documentclass[11pt]{exam}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=blue,
+}
+\printanswers
+\footer{}{\thepage}{}
+
 \usepackage[utf8]{inputenc}
-\usepackage[margin=2cm]{geometry}
-\usepackage{multirow}
-\usepackage{graphicx}
-\usepackage{bm}
-\usepackage[usenames,dvipsnames]{color}
-\usepackage{booktabs}
-\usepackage{fancyhdr}
-\usepackage[most]{tcolorbox}
-\usepackage[authoryear]{natbib}
-\usepackage{amsmath}
-\usepackage{amssymb}
-\usepackage{eucal}
-\usepackage[]{minted}
-\usepackage{enumitem}
-\usepackage{latexsym}
-\usepackage{indentfirst}
-\usepackage[english]{babel}
-\usepackage[autostyle, english = american]{csquotes}
-\usepackage{titlesec}
+\usepackage{geometry}
+ \geometry{a4paper,left=30mm,right=30mm,top=30mm,bottom=30mm}
 
-\titleformat*{\section}{\LARGE\bfseries}
-\titleformat*{\subsection}{\Large\bfseries}
-\titleformat*{\subsubsection}{\large}
-\MakeOuterQuote{"}
-
-\setmonofont[Scale=0.75]{Hack NF}
-
-\def \courseNumber {CS3500}
-\def \courseName {Operating Systems}
-\def \assignmentName {<Lab Name>}
-\def \myName {Akilesh Kannan}
-\def \rollNumber {EE18B122}
-
-\pagestyle{fancy}
-\fancyhf{}
-\rhead{\assignmentName}
-\lhead{\courseNumber: \courseName}
-\cfoot{\thepage}
-
-\linespread{1.2}
-
-\renewcommand{\familydefault}{\sfdefault} %command to change font to sans-serif
-
-\definecolor{blue(ryb)}{rgb}{0.01, 0.28, 1.0}
-\definecolor{green(ryb)}{rgb}{0.28, 1.0, 0.01}
-\definecolor{red(ryb)}{rgb}{1.0, 0.01, 0.28}
-\definecolor{black(ryb)}{rgb}{0, 0, 0}
-\definecolor{gray(ryb)}{rgb}{0.75, 0.75, 0.75}
-
-\newenvironment{colorboxed}[4][gray]{
-\begin{tcolorbox}[colback=#1!3!white,colframe=#1(ryb)!50!black,title=\textbf{#2: #3},#4]
-}{
-\end{tcolorbox}
+\usepackage{titling}
+\newcommand{\subtitle}[1]{%
+  \posttitle{%
+    \par\end{center}
+    \begin{center}\Large\textbf{#1}\end{center}}%
 }
 
-\begin{document} 
-\thispagestyle{empty}
-\vspace{-4.5cm}
+\usepackage{graphicx}
 
-\hspace*{-\parindent}
-\begin{minipage}{0.65\textwidth}
-{\fontsize{22pt}{10pt}\selectfont\textbf{\assignmentName}}\\[1mm]
-\Large
-\textit{\courseNumber: \courseName}\\[5mm]
-\Large \myName \\
-\normalsize \rollNumber \\
-\end{minipage}\hfill% push everything to the right
-\raisebox{-13mm}{\includegraphics[scale=.28]{logo.pdf}}
-
-\hrule \hrule
-\medskip
-\vspace{-0.2cm}
+\title{\textbf{CS3500: Operating Systems}}
+\subtitle{Lab 4: Stacks and the Kernel Context Calls\vspace{-1em}}
+\date{\today}
 
 
-%%Beginning References. Don't add any text beyond this.
-%%------------------------------------------
+\begin{document}
 
-%\newpage %sending References to the last page
+\maketitle
 
-%\bibliography{paper}
-%\bibliographystyle{apalike}
+\section*{Introduction} In the previous labs, we became familiar with system calls. We also learnt the paging mechanism in xv6. This lab will look into the stack management in a process and the kernel's context. Firstly, we will look at a debugger called \textbf{qemu-gdb} and get some insights into RISC-V assembly. Thereafter, we will introduce a system call to print the kernel state of a process in xv6.
+
+\section*{Resources} Please go through the following resources before beginning this lab assignment:
+\begin{enumerate}
+    \item The \textbf{xv6 book}: \textbf{Chapter 4} (\textbf{Traps and System Calls}): sections \textbf{4.1}, \textbf{4.2}, \textbf{4.5}
+    \item Source files: \texttt{kernel/trampoline.S} and \texttt{kernel/trap.c}
+\end{enumerate}
+
+\section*{Note} As part of this assignment, we have provided a clean version of the xv6 repo, with the required files included in it. Please implement your solutions in this repo only. We have also attached the \LaTeX template of this document. Please write your answers in this file and submit the generated PDF (NOT the \texttt{.tex}). 
+
+\section{Avengers, Assemble! (20 points)}
+For this section, it will be important to understand a bit of RISC-V assembly. \\
+
+\noindent There is a file named \texttt{user/call.c} as part of the provided xv6 repo. Modify the \texttt{Makefile} suitably to allow \texttt{user/call.c} to be compiled as a user program in xv6. Run the command \texttt{make fs.img}, which compiles \texttt{user/call.c} (among other files) and produces a readable assembly version of the program in \texttt{user/call.asm}. \noindent Read the assembly code in \texttt{user/call.asm} for the functions \texttt{g()}, \texttt{f()}, and \texttt{main()}. Here are some questions that you should answer:
+
+\begin{questions}
+    \question[3] Which registers contain arguments to functions? For example, which register holds \texttt{13} in \texttt{main()}'s call to \texttt{printf()}?
+       
+       \begin{solution}
+
+
+
+       \end{solution}
+    
+    
+    \question[2] Where is the function call to \texttt{f()} from \texttt{main()}? Where is the call to \texttt{g()}? (\textbf{HINT}: the compiler may inline functions.)
+    
+        \begin{solution}
+
+
+
+        \end{solution}
+    
+    \question[2] At what address is the function \texttt{printf()} located?
+        \begin{solution}
+
+
+
+        \end{solution}
+        
+    
+    \question[2] What value is in the register \texttt{ra} just after the \texttt{jalr} to \texttt{printf()} in \texttt{main()}?
+    
+        \begin{solution}
+
+
+
+        \end{solution}
+        
+    \question[11] Run the following code.
+    \begin{verbatim}
+        unsigned int i = 0x00646c72;
+        printf("H%x Wo%s", 57616, &i);
+    \end{verbatim}
+	\begin{parts}
+	    \part[3] What is the output? Here's an \href{https://www.garykessler.net/library/ascii.html}{ASCII table} that maps bytes to characters.
+	        \begin{solution}
+
+
+
+            \end{solution}
+    
+	    
+	    \part[5] The above output depends on that fact that the RISC-V is little-endian. If the RISC-V were instead big-endian, what would you set \texttt{i} to in order to yield the same output? Would you need to change 57616 to a different value? Here's a description of \href{https://www.webopedia.com/TERM/B/big_endian.html}{little- and big-endian}.
+	        \begin{solution}
+	        
+	        \end{solution}
+	    
+	    
+	    
+	    \part[3] In the following code, what is going to be printed after \texttt{`y='}? (Note: the answer is not a specific value.) Why does this happen?\\
+        \begin{verbatim}
+            printf("x=%d y=%d", 3); 
+        \end{verbatim}
+    \begin{solution}
+
+    
+    \end{solution}
+
+	\end{parts}
+\end{questions}
+
+\section{The Retreat (30 points)}
+
+When something goes wrong, it is often helpful to look back and see what events led to the current predicament. In debugging terminology, we call this introspection a \textbf{{\em backtrace}}. Consider a code that dereferences a null pointer, which means it cannot execute any further due to the resulting kernel panic. While working with xv6, you may have encountered (or will encounter) such panics. \\
+
+\noindent In each stack frame, the compiler puts a frame pointer that holds the address of the caller's frame pointer. We can design a \texttt{backtrace()} function using these frame pointers to walk the stack back up and print the saved return address in each stack frame. The GCC compiler, for instance, stores the frame pointer of the currently executing function in the register {\tt s0}. 
+
+\begin{questions}
+\question[30] In this section, you need to implement {\tt backtrace()}. Feel free to refer to the hints provided at the end of this section.
+
+\begin{parts}
+\part[20] Implement the {\tt backtrace()} function in {\tt kernel/printf.c}. Insert a call to this function in {\tt sys$\_$sleep()} in \texttt{kernel/sysproc.c} just before the \texttt{return} statement (you may comment out this line after you are done with this section). There is a user program \texttt{user/bttest.c} as part of the provided xv6 repo. Modify the \texttt{Makefile} accordingly and then run {\tt bttest}, which calls {\tt sys$\_$sleep()}. Here is a sample output (you may get slightly different addresses):\\
+
+\begin{verbatim}
+    $ bttest
+    backtrace:
+    0x0000000080002c1a
+    0x0000000080002a3e
+    0x00000000800026ba
+    
+\end{verbatim}
+
+What are the steps you followed? What is the output that you got?
+
+\begin{solution}
+
+\end{solution}
+
+ \part[5] Use the {\tt addr2line} utility to verify the lines in code to which these addresses map to. Please mention the command you used along with the output you obtained.
+ 
+\begin{solution}
+
+\end{solution}
+
+\part[5] Once your \texttt{backtrace()} is working, invoke it from the {\tt panic()} function in {\tt kernel/printf.c}. Add a null pointer dereference statement in the \texttt{exec()} function in \texttt{kernel/exec.c}, and then check the kernel's backtrace when it panics. What was the output you obtained? What functions/line numbers/file names do these addresses correspond to? (Don't forget to comment out the null pointer dereference statement after you are done with this section.)
+
+\begin{solution}
+
+\end{solution}
+
+\end{parts}
+
+\subsection*{Additional hints for implementing \texttt{backtrace()}}
+
+\begin{itemize}
+    \item Add the prototype \texttt{void backtrace(void)} to {\tt kernel/defs.h}.
+    \item Look at the inline assembly functions in {\tt kernel/riscv.h}. Similarly, add your own function, \texttt{static inline uint64 r\_fp()}, and call this from {\tt backtrace()} to read the current frame pointer. (\textbf{HINT}: The current frame pointer is stored in the register \texttt{s0}.)
+    \item Here is a stack diagram for your reference. The current frame pointer is represented by \texttt{\$fp} and the current stack pointer by \texttt{\$sp}. Note that the return address and previous frame pointer live at fixed offsets from the current frame pointer. (What are these offsets?) To follow the frame pointers back up the stack, brush up on your knowledge of pointers.
+    \begin{verbatim}
+                             .
+                             .
+                             .
+        0x2fe0 +-> +------------------+   |
+        0x2fd8 |   | ret addr         |   |
+        0x2fd0 |   | 0x2ff8 (prev fp) ----+
+        0x2fc8 |   |        ...       |
+        0x2fc0 |   |        ...       |
+$fp --> 0x2fb8 |   +------------------+ <-+
+        0x2fb0 |   | ret addr         |   |
+$sp --> 0x2fa8 +---- 0x2fe0 (prev fp) |   |
+                   +------------------+   |
+                             .
+                             .
+                             .
+    \end{verbatim}
+    \item You may face some issues in terminating the backtrace. Note that xv6 allocates one page for each stack in the xv6 kernel at PAGE-aligned address. You can compute the top and bottom address of the stack page by using {\tt PGROUNDUP(fp)} and {\tt PGROUNDDOWN(fp)} (see {\tt kernel/riscv.h}). These are helpful for terminating the loop in your \texttt{backtrace()}.
+\end{itemize}
+
+
+\question[30] {\bf [OPTIONAL]} Print the names of the functions and line numbers in {\tt backtrace()} instead of numerical addresses.
+
+
+\end{questions}
+
+\section{The Attack \ldots (20 points)}
+A process not just has its own virtual address space but, it also has metadata in the kernel. In this part we will try to understand the contents of these metadata.
+
+\begin{questions}
+\question[5] Every process is allocated a Process Control Block entry into the {\tt proc} structure. Introduce a system call {\tt pcbread} to print the contents of the {\tt proc} structure.
+
+Write a user program {\tt user/attack.c} (similar to question 1). Use this program to invoke and test {\tt pcbread}. 
+
+What is the PID of the process?
+\begin{solution}
+
+\end{solution}
+
+\question[5] Fork a child process in {\tt attack.c}. Use your system call to find the similarities and differences between the parent and child's PCB. List those differences here.
+\begin{solution}
+
+\end{solution}
+
+
+\question[5] Just before {\tt usertrapret} returns, print the contents of the trapframe in the parent and child process in {\tt attack.c}. This printing should be done only for the {\tt fork} system call and at no other time.
+How are the trapframes different?
+\begin{solution}
+
+\end{solution}
+
+\question[5] Print the contents of the {\tt a0} to {\tt a6} registers from the trapframe. Compare the contents of these registers with system call arguments passed from the {\tt attack.c}. Test with several different system calls. 
+List your observations here.
+\begin{solution}
+
+\end{solution}
+\end{questions}
+
+\section*{Submission Guidelines}  
+\begin{enumerate}
+    \item Implement your solutions in the provided xv6 folder. Write your answers in the attached \LaTeX template, convert it to PDF and name it as \texttt{YOUR\_ROLL\_NO.pdf}. This will serve as a report for the assignment.
+    \item Put your entire solution xv6 folder, and the \texttt{YOUR\_ROLL\_NO.pdf} in a common folder named \texttt{YOUR\_ROLL\_NO\_LAB4}. 
+    \item Compress the folder \texttt{YOUR\_ROLL\_NO\_LAB4} into \texttt{YOUR\_ROLL\_NO\_LAB5.tar.gz} and submit the compressed folder on Moodle.
+    \item NOTE: Make sure to run \texttt{make clean}, delete any additional manual and the \texttt{.git} folder from the xv6 folder before submitting.
+\end{enumerate}
+
 \end{document}
