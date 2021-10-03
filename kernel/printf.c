@@ -122,3 +122,19 @@ void printfinit(void){
   initlock(&pr.lock, "pr");
   pr.locking = 1;
 }
+
+void backtrace(){
+  uint64* currFP;
+  uint64 stackPGUP, stackPGDOWN, retAddr;
+  currFP = (uint64*) r_fp();
+  stackPGUP = PGROUNDUP(*currFP);
+  stackPGDOWN = PGROUNDDOWN(*currFP);
+
+  while(stackPGUP != stackPGDOWN){
+    retAddr = *(currFP-1);
+    printf("%p\n", retAddr);
+    currFP = (uint64*) (*(currFP - 2));
+    stackPGUP = PGROUNDUP(*currFP);
+    stackPGDOWN = PGROUNDDOWN(*currFP);
+  }
+}
