@@ -16,12 +16,16 @@ void kernelvec();
 
 extern int devintr();
 
-void trapinit(void){
+void
+trapinit(void)
+{
   initlock(&tickslock, "time");
 }
 
 // set up to take exceptions and traps while in the kernel.
-void trapinithart(void){
+void
+trapinithart(void)
+{
   w_stvec((uint64)kernelvec);
 }
 
@@ -29,7 +33,9 @@ void trapinithart(void){
 // handle an interrupt, exception, or system call from user space.
 // called from trampoline.S
 //
-void usertrap(void){
+void
+usertrap(void)
+{
   int which_dev = 0;
 
   if((r_sstatus() & SSTATUS_SPP) != 0)
@@ -42,7 +48,7 @@ void usertrap(void){
   struct proc *p = myproc();
   
   // save user program counter.
-  p->trapframe->epc = r_sepc();
+  p->tf->epc = r_sepc();
   
   if(r_scause() == 8){
     // system call
@@ -52,7 +58,7 @@ void usertrap(void){
 
     // sepc points to the ecall instruction,
     // but we want to return to the next instruction.
-    p->trapframe->epc += 4;
+    p->tf->epc += 4;
 
     // an interrupt will change sstatus &c registers,
     // so don't enable until done with those registers.
@@ -80,12 +86,13 @@ void usertrap(void){
 //
 // return to user space
 //
-void usertrapret(void){
+void
+usertrapret(void)
+{
   struct proc *p = myproc();
 
-  // we're about to switch the destination of traps from
-  // kerneltrap() to usertrap(), so turn off interrupts until
-  // we're back in user space, where usertrap() is correct.
+  // turn off interrupts, since we're switching
+  // now from kerneltrap() to usertrap().
   intr_off();
 
   // send syscalls, interrupts, and exceptions to trampoline.S
@@ -93,10 +100,53 @@ void usertrapret(void){
 
   // set up trapframe values that uservec will need when
   // the process next re-enters the kernel.
-  p->trapframe->kernel_satp = r_satp();         // kernel page table
-  p->trapframe->kernel_sp = p->kstack + PGSIZE; // process's kernel stack
-  p->trapframe->kernel_trap = (uint64)usertrap;
-  p->trapframe->kernel_hartid = r_tp();         // hartid for cpuid()
+  p->tf->kernel_satp = r_satp();         // kernel page table
+  p->tf->kernel_sp = p->kstack + PGSIZE; // process's kernel stack
+  p->tf->kernel_trap = (uint64)usertrap;
+  p->tf->kernel_hartid = r_tp();         // hartid for cpuid()
+
+  if(p->tf->a7==1){ //fork system call
+    if(p->pid>2){ // parent process
+      if(strncmp(p->name, "attack", strlen(p->name))==0){
+        printf("PID %d\t epc: %d\n", p->pid, p->tf->epc);
+        printf("PID %d\t kernel_satp: %d\n", p->pid, p->tf->kernel_satp);
+        printf("PID %d\t kernel_sp: %d\n", p->pid, p->tf->kernel_sp);
+        printf("PID %d\t kernel_trap: %d\n", p->pid, p->tf->kernel_trap);
+        printf("PID %d\t kernel_hartid: %d\n", p->pid, p->tf->kernel_hartid);
+        printf("PID %d\t a0: %d\n", p->pid, p->tf->a0);
+        printf("PID %d\t a1: %d\n", p->pid, p->tf->a1);
+        printf("PID %d\t a2: %d\n", p->pid, p->tf->a2);
+        printf("PID %d\t a3: %d\n", p->pid, p->tf->a3);
+        printf("PID %d\t a4: %d\n", p->pid, p->tf->a4);
+        printf("PID %d\t a5: %d\n", p->pid, p->tf->a5);
+        printf("PID %d\t a6: %d\n", p->pid, p->tf->a6);
+        printf("PID %d\t a7: %d\n", p->pid, p->tf->a7);
+        printf("PID %d\t ra: %d\n", p->pid, p->tf->ra);
+        printf("PID %d\t sp: %d\n", p->pid, p->tf->sp);
+        printf("PID %d\t gp: %d\n", p->pid, p->tf->gp);
+        printf("PID %d\t tp: %d\n", p->pid, p->tf->tp);
+        printf("PID %d\t t0: %d\n", p->pid, p->tf->t0);
+        printf("PID %d\t t1: %d\n", p->pid, p->tf->t1);
+        printf("PID %d\t t2: %d\n", p->pid, p->tf->t2);
+        printf("PID %d\t t3: %d\n", p->pid, p->tf->t3);
+        printf("PID %d\t t4: %d\n", p->pid, p->tf->t4);
+        printf("PID %d\t t5: %d\n", p->pid, p->tf->t5);
+        printf("PID %d\t t6: %d\n", p->pid, p->tf->t6);
+        printf("PID %d\t s0: %d\n", p->pid, p->tf->s0);
+        printf("PID %d\t s1: %d\n", p->pid, p->tf->s1);
+        printf("PID %d\t s2: %d\n", p->pid, p->tf->s2);
+        printf("PID %d\t s3: %d\n", p->pid, p->tf->s3);
+        printf("PID %d\t s4: %d\n", p->pid, p->tf->s4);
+        printf("PID %d\t s5: %d\n", p->pid, p->tf->s5);
+        printf("PID %d\t s6: %d\n", p->pid, p->tf->s6);
+        printf("PID %d\t s7: %d\n", p->pid, p->tf->s7);
+        printf("PID %d\t s8: %d\n", p->pid, p->tf->s8);
+        printf("PID %d\t s9: %d\n", p->pid, p->tf->s9);
+        printf("PID %d\t s10: %d\n", p->pid, p->tf->s10);
+        printf("PID %d\t s11: %d\n", p->pid, p->tf->s11);
+      }
+    }
+  }
 
   // set up the registers that trampoline.S's sret will use
   // to get to user space.
@@ -108,7 +158,7 @@ void usertrapret(void){
   w_sstatus(x);
 
   // set S Exception Program Counter to the saved user pc.
-  w_sepc(p->trapframe->epc);
+  w_sepc(p->tf->epc);
 
   // tell trampoline.S the user page table to switch to.
   uint64 satp = MAKE_SATP(p->pagetable);
@@ -122,7 +172,10 @@ void usertrapret(void){
 
 // interrupts and exceptions from kernel code go here via kernelvec,
 // on whatever the current kernel stack is.
-void kerneltrap(){
+// must be 4-byte aligned to fit in stvec.
+void 
+kerneltrap()
+{
   int which_dev = 0;
   uint64 sepc = r_sepc();
   uint64 sstatus = r_sstatus();
@@ -149,7 +202,9 @@ void kerneltrap(){
   w_sstatus(sstatus);
 }
 
-void clockintr(){
+void
+clockintr()
+{
   acquire(&tickslock);
   ticks++;
   wakeup(&ticks);
@@ -161,7 +216,9 @@ void clockintr(){
 // returns 2 if timer interrupt,
 // 1 if other device,
 // 0 if not recognized.
-int devintr(){
+int
+devintr()
+{
   uint64 scause = r_scause();
 
   if((scause & 0x8000000000000000L) &&
@@ -175,16 +232,9 @@ int devintr(){
       uartintr();
     } else if(irq == VIRTIO0_IRQ){
       virtio_disk_intr();
-    } else if(irq){
-      printf("unexpected interrupt irq=%d\n", irq);
     }
 
-    // the PLIC allows each device to raise at most one
-    // interrupt at a time; tell the PLIC the device is
-    // now allowed to interrupt again.
-    if(irq)
-      plic_complete(irq);
-
+    plic_complete(irq);
     return 1;
   } else if(scause == 0x8000000000000001L){
     // software interrupt from a machine-mode timer interrupt,

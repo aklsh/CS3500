@@ -2,7 +2,9 @@
 #include "kernel/stat.h"
 #include "user/user.h"
 
-int main(int argc, char *argv[]){
+int
+main(int argc, char *argv[])
+{
   if(argc != 3){
     fprintf(2, "Usage: ln old new\n");
     exit(1);

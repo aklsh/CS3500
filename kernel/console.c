@@ -27,23 +27,30 @@
 
 //
 // send one character to the uart.
-// called by printf, and to echo input characters,
-// but not from write().
 //
-void consputc(int c){
+void
+consputc(int c)
+{
+  extern volatile int panicked; // from printf.c
+
+  if(panicked){
+    for(;;)
+      ;
+  }
+
   if(c == BACKSPACE){
     // if the user typed backspace, overwrite with a space.
-    uartputc_sync('\b'); uartputc_sync(' '); uartputc_sync('\b');
+    uartputc('\b'); uartputc(' '); uartputc('\b');
   } else {
-    uartputc_sync(c);
+    uartputc(c);
   }
 }
 
-struct{
+struct {
   struct spinlock lock;
   
   // input
-  #define INPUT_BUF 128
+#define INPUT_BUF 128
   char buf[INPUT_BUF];
   uint r;  // Read index
   uint w;  // Write index
@@ -53,17 +60,21 @@ struct{
 //
 // user write()s to the console go here.
 //
-int consolewrite(int user_src, uint64 src, int n){
+int
+consolewrite(int user_src, uint64 src, int n)
+{
   int i;
 
+  acquire(&cons.lock);
   for(i = 0; i < n; i++){
     char c;
     if(either_copyin(&c, user_src, src+i, 1) == -1)
       break;
-    uartputc(c);
+    consputc(c);
   }
+  release(&cons.lock);
 
-  return i;
+  return n;
 }
 
 //
@@ -72,7 +83,9 @@ int consolewrite(int user_src, uint64 src, int n){
 // user_dist indicates whether dst is a user
 // or kernel address.
 //
-int consoleread(int user_dst, uint64 dst, int n){
+int
+consoleread(int user_dst, uint64 dst, int n)
+{
   uint target;
   int c;
   char cbuf;
@@ -126,7 +139,9 @@ int consoleread(int user_dst, uint64 dst, int n){
 // do erase/kill processing, append to cons.buf,
 // wake up consoleread() if a whole line has arrived.
 //
-void consoleintr(int c){
+void
+consoleintr(int c)
+{
   acquire(&cons.lock);
 
   switch(c){
@@ -170,7 +185,9 @@ void consoleintr(int c){
   release(&cons.lock);
 }
 
-void consoleinit(void){
+void
+consoleinit(void)
+{
   initlock(&cons.lock, "cons");
 
   uartinit();

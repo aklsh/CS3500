@@ -21,10 +21,14 @@
 }
 
 \usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage[]{minted}
+\setlist[itemize]{noitemsep, topsep=0pt}
 
 \title{\textbf{CS3500: Operating Systems}}
-\subtitle{Lab 4: Stacks and the Kernel Context Calls\vspace{-1em}}
+\subtitle{Lab 4: Stacks and the Kernel Context Calls}
 \date{\today}
+\author{Akilesh Kannan (EE18B122)}
 
 
 \begin{document}
@@ -50,9 +54,8 @@ For this section, it will be important to understand a bit of RISC-V assembly. \
     \question[3] Which registers contain arguments to functions? For example, which register holds \texttt{13} in \texttt{main()}'s call to \texttt{printf()}?
        
        \begin{solution}
-
-
-
+           Arguments to a function are held in the registers \texttt{a0}-\texttt{a7}.
+           Register \texttt{a2} holds the value \texttt{13} in \texttt{main()}'s call to \texttt{printf()}. Here, only \texttt{a0}, \texttt{a1} and \texttt{a2} are used.
        \end{solution}
     
     
@@ -60,14 +63,23 @@ For this section, it will be important to understand a bit of RISC-V assembly. \
     
         \begin{solution}
 
+            In address \texttt{0x26}, we can see that the compiler has optimised the code to the extent of directly hard-coding the final value of \texttt{f(8)+1} (instead of having a \texttt{jalr} instruction to \texttt{f()}). This is the call to \texttt{f()} from \texttt{main()}.
+            \begin{center}
+                \mintinline{text}{45b1       li  a1,12}
+            \end{center}
 
-
+            In address \texttt{0x14}, the compiler has inlined the call to \texttt{g()}.
+            \begin{center}
+                \mintinline{text}{250d       addiw  a0,a0,3}
+            \end{center}
         \end{solution}
     
     \question[2] At what address is the function \texttt{printf()} located?
         \begin{solution}
-
-
+            It starts at address location \texttt{0x628}. This is in the virtual address space of the process.
+            \begin{center}
+                \mintinline{text}{0000000000000628 <printf>:}
+            \end{center}
 
         \end{solution}
         
@@ -75,8 +87,7 @@ For this section, it will be important to understand a bit of RISC-V assembly. \
     \question[2] What value is in the register \texttt{ra} just after the \texttt{jalr} to \texttt{printf()} in \texttt{main()}?
     
         \begin{solution}
-
-
+            \texttt{0x30}. \texttt{AUIPC} instruction forms a 32-bit (intermediate) immediate value with the lower 12-bits as 0 and upper 20 bits as the number passed to the instruction (here, \texttt{0x0}). This is then added to the current value of \texttt{PC} (here, \texttt{0x30}) and this immediate value is stored in the register given in the instruction (in this case, it is \texttt{ra}).
 
         \end{solution}
         
@@ -87,16 +98,14 @@ For this section, it will be important to understand a bit of RISC-V assembly. \
     \end{verbatim}
 	\begin{parts}
 	    \part[3] What is the output? Here's an \href{https://www.garykessler.net/library/ascii.html}{ASCII table} that maps bytes to characters.
-	        \begin{solution}
-
-
-
+	        \begin{solution} 
+                \texttt{HE110 World}
             \end{solution}
     
 	    
 	    \part[5] The above output depends on that fact that the RISC-V is little-endian. If the RISC-V were instead big-endian, what would you set \texttt{i} to in order to yield the same output? Would you need to change 57616 to a different value? Here's a description of \href{https://www.webopedia.com/TERM/B/big_endian.html}{little- and big-endian}.
 	        \begin{solution}
-	        
+                We do not need to change 57616 to a different value, as it is just printed in hexadecimal. So, in little-/big-endian, the value printed in hex remains same, as it is "not stored in memory". We need to change the value of \texttt{i} to \texttt{0x726C6400}. The \texttt{00} is needed for null character termination of the string.
 	        \end{solution}
 	    
 	    
@@ -107,6 +116,7 @@ For this section, it will be important to understand a bit of RISC-V assembly. \
         \end{verbatim}
     \begin{solution}
 
+        It will print a junk value. For my case, it printed {\tt 5309}. This junk value is present in the {\tt a2} register and hence it is getting printed.
     
     \end{solution}
 
@@ -130,26 +140,67 @@ When something goes wrong, it is often helpful to look back and see what events 
     backtrace:
     0x0000000080002c1a
     0x0000000080002a3e
-    0x00000000800026ba
-    
+    0x00000000800026ba 
 \end{verbatim}
 
 What are the steps you followed? What is the output that you got?
 
 \begin{solution}
 
+    Steps/Approach:
+    \begin{itemize}
+        \item Get the current frame pointer location from register s0. It is done in the function \texttt{r\_fp()}. %as follows:
+            % \inputminted[firstline=246, lastline=251]{c}{kernel/riscv.h}
+        \item Read and print the current return address, located at an offset of \texttt{-8} from frame pointer.
+        \item Set frame pointer to the location pointed to in the location at an offset of \texttt{-16} from current frame pointer.
+        \item Repeat above 2 steps tille we reach the first stack frame of the process. This is done by checking if the frame pointer is above the stack pointer. For the very first stack frame, both will be same.
+    \end{itemize}
+
+    Output:
+    \begin{minted}[breaklines]
+    {text}
+    $ bttest
+    backtrace:
+    Stack pointer: 0x0000003fffffa000, Frame pointer: 0x0000003fffff9f80, Return Address: 0x0000000080002d3a
+    Stack pointer: 0x0000003fffffa000, Frame pointer: 0x0000003fffff9fc0, Return Address: 0x0000000080002b9c
+    Stack pointer: 0x0000003fffffa000, Frame pointer: 0x0000003fffff9fe0, Return Address: 0x0000000080002886
+    Stack pointer: 0x0000003fffffa000, Frame pointer: 0x0000003fffffa000
+    \end{minted}
 \end{solution}
 
  \part[5] Use the {\tt addr2line} utility to verify the lines in code to which these addresses map to. Please mention the command you used along with the output you obtained.
  
 \begin{solution}
-
+    \begin{minted}[breaklines]
+    {text}
+    $ riscv64-unknown-elf-addr2line -e kernel/kernel
+    0x0000000080002d3a
+    0x0000000080002b9c
+    0x0000000080002886
+    /home/aklsh/Courses/CS3500/xv6/kernel/sysproc.c:62
+    /home/aklsh/Courses/CS3500/xv6/kernel/syscall.c:126
+    /home/aklsh/Courses/CS3500/xv6/kernel/trap.c:70
+    \end{minted}
 \end{solution}
 
 \part[5] Once your \texttt{backtrace()} is working, invoke it from the {\tt panic()} function in {\tt kernel/printf.c}. Add a null pointer dereference statement in the \texttt{exec()} function in \texttt{kernel/exec.c}, and then check the kernel's backtrace when it panics. What was the output you obtained? What functions/line numbers/file names do these addresses correspond to? (Don't forget to comment out the null pointer dereference statement after you are done with this section.)
 
 \begin{solution}
-
+    \begin{minted}[breaklines]
+    {text}
+    0x000000008000065a
+    0x00000000800029cc
+    0x0000000080005b94
+    0x0000000080005a0e
+    0x0000000080002ba4
+    0x000000008000288e
+    /home/aklsh/Courses/CS3500/xv6/kernel/printf.c:117
+    /home/aklsh/Courses/CS3500/xv6/kernel/trap.c:143 (discriminator 1)
+    ??:?
+    /home/aklsh/Courses/CS3500/xv6/kernel/sysfile.c:412
+    /home/aklsh/Courses/CS3500/xv6/kernel/syscall.c:126
+    /home/aklsh/Courses/CS3500/xv6/kernel/trap.c:70
+    \end{minted}
 \end{solution}
 
 \end{parts}
@@ -196,25 +247,140 @@ Write a user program {\tt user/attack.c} (similar to question 1). Use this progr
 
 What is the PID of the process?
 \begin{solution}
-
+    \texttt{PID} of the process is \texttt{3}. It is executed just after \texttt{sh}.
 \end{solution}
 
 \question[5] Fork a child process in {\tt attack.c}. Use your system call to find the similarities and differences between the parent and child's PCB. List those differences here.
 \begin{solution}
+    \begin{minted}[breaklines]
+          {text}
+$ attack
 
+Proc Structure Entries for current process:
+-------------------------------------------
+Name: attack
+PID: 3
+Parent Process PID: 2
+Size: 12288 Bytes
+Process State: RUNNING
+Channel: 0x0000000000000000
+Killed Status: 0
+Exit Status: 0
+KStack location: 0x0000003fffff9000
+Trapframe: 0x0000000087f65000
+Pagetable base address: 0x0000000087f49000
+Context: 0x0000000080011a00
+
+Proc Structure Entries for current process:
+-------------------------------------------
+Name: attack
+PID: 4
+Parent Process PID: 3
+Size: 12288 Bytes
+Process State: RUNNING
+Channel: 0x0000000000000000
+Killed Status: 0
+Exit Status: 0
+KStack location: 0x0000003fffff7000
+Trapframe: 0x0000000087f4a000
+Pagetable base address: 0x0000000087f76000
+Context: 0x0000000080011b68
+    \end{minted}
+    \begin{itemize}
+        \item The {\tt Kstack}, {\tt Trapframe}, {\tt Pagetable base address} and {\tt Context} are different for child and parent. This is because these are to be maintained separately for each process on the system. 
+        \item {\tt PID} of child is one more than the parent. The rest of the fields are same as the child is a copy of the parent.
+    \end{itemize}
 \end{solution}
 
 
 \question[5] Just before {\tt usertrapret} returns, print the contents of the trapframe in the parent and child process in {\tt attack.c}. This printing should be done only for the {\tt fork} system call and at no other time.
 How are the trapframes different?
 \begin{solution}
-
+    \begin{minted}[breaklines]
+        {text}
+$ attack
+PID 3	 epc: 526
+PID 4	 epc: 526
+PID 3	 kernel_satp: 557055
+PID 4	 kernel_satp: 557055
+PID 3	 kernel_sp: -24576
+PID 4	 kernel_sp: -32768
+PID 3	 kernel_trap: -2147472944
+PID 4	 kernel_trap: -2147472944
+PID 3	 kernel_hartid: 1
+PID 4	 kernel_hartid: 2
+PID 3	 a0: 4
+PID 4	 a0: 0
+PID 3	 a1: 12256
+PID 4	 a1: 12256
+PID 3	 a2: 5183
+PID 4	 a2: 5183
+PID 3	 a3: 16032
+PID 4	 a3: 16032
+PID 3	 a4: 4984
+PID 4	 a4: 4984
+PID 3	 a5: 238
+PID 4	 a5: 238
+PID 3	 a6: 0
+PID 4	 a6: 0
+PID 3	 a7: 1
+PID 4	 a7: 1
+PID 3	 ra: 16
+PID 4	 ra: 16
+PID 3	 sp: 12240
+PID 4	 sp: 12240
+PID 3	 gp: 84215045
+PID 4	 gp: 84215045
+PID 3	 tp: 84215045
+PID 4	 tp: 84215045
+PID 3	 t0: 84215045
+PID 4	 t0: 84215045
+PID 3	 t1: 84215045
+PID 4	 t1: 84215045
+PID 3	 t2: 84215045
+PID 4	 t2: 84215045
+PID 3	 t3: 84215045
+PID 4	 t3: 84215045
+PID 3	 t4: 84215045
+PID 4	 t4: 84215045
+PID 3	 t5: 84215045
+PID 4	 t5: 84215045
+PID 3	 t6: 84215045
+PID 4	 t6: 84215045
+PID 3	 s0: 12256
+PID 4	 s0: 12256
+PID 3	 s1: 81744
+PID 4	 s1: 81744
+PID 3	 s2: 99
+PID 4	 s2: 99
+PID 3	 s3: 32
+PID 4	 s3: 32
+PID 3	 s4: 5179
+PID 4	 s4: 5179
+PID 3	 s5: 4968
+PID 4	 s5: 4968
+PID 3	 s6: 84215045
+PID 4	 s6: 84215045
+PID 3	 s7: 84215045
+PID 4	 s7: 84215045
+PID 3	 s8: 84215045
+PID 4	 s8: 84215045
+PID 3	 s9: 84215045
+PID 4	 s9: 84215045
+PID 3	 s10: 84215045
+PID 4	 s10: 84215045
+PID 3	 s11: 84215045
+PID 4	 s11: 84215045
+    \end{minted}
+    \begin{itemize}
+        \item The only difference between the child and parent trapframes is in the {\tt a0} register value. It denotes the return value from {\tt fork()} and it is {\tt 0} in the child and it is the child's {\tt PID} in the parent.
+    \end{itemize}
 \end{solution}
 
 \question[5] Print the contents of the {\tt a0} to {\tt a6} registers from the trapframe. Compare the contents of these registers with system call arguments passed from the {\tt attack.c}. Test with several different system calls. 
 List your observations here.
 \begin{solution}
-
+    These registers contain the arguments to the system calls. In case of strings or other arrays (for {\tt sys\_echo\_kernel} implemented in Assignment 2), the registers contain the pointers to these structures.
 \end{solution}
 \end{questions}
 
@@ -222,7 +388,7 @@ List your observations here.
 \begin{enumerate}
     \item Implement your solutions in the provided xv6 folder. Write your answers in the attached \LaTeX template, convert it to PDF and name it as \texttt{YOUR\_ROLL\_NO.pdf}. This will serve as a report for the assignment.
     \item Put your entire solution xv6 folder, and the \texttt{YOUR\_ROLL\_NO.pdf} in a common folder named \texttt{YOUR\_ROLL\_NO\_LAB4}. 
-    \item Compress the folder \texttt{YOUR\_ROLL\_NO\_LAB4} into \texttt{YOUR\_ROLL\_NO\_LAB5.tar.gz} and submit the compressed folder on Moodle.
+    \item Compress the folder \texttt{YOUR\_ROLL\_NO\_LAB4} into \texttt{YOUR\_ROLL\_NO\_LAB4.tar.gz} and submit the compressed folder on Moodle.
     \item NOTE: Make sure to run \texttt{make clean}, delete any additional manual and the \texttt{.git} folder from the xv6 folder before submitting.
 \end{enumerate}
 

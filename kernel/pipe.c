@@ -10,7 +10,7 @@
 
 #define PIPESIZE 512
 
-struct pipe{
+struct pipe {
   struct spinlock lock;
   char data[PIPESIZE];
   uint nread;     // number of bytes read
@@ -19,7 +19,9 @@ struct pipe{
   int writeopen;  // write fd is still open
 };
 
-int pipealloc(struct file **f0, struct file **f1){
+int
+pipealloc(struct file **f0, struct file **f1)
+{
   struct pipe *pi;
 
   pi = 0;
@@ -53,7 +55,9 @@ int pipealloc(struct file **f0, struct file **f1){
   return -1;
 }
 
-void pipeclose(struct pipe *pi, int writable){
+void
+pipeclose(struct pipe *pi, int writable)
+{
   acquire(&pi->lock);
   if(writable){
     pi->writeopen = 0;
@@ -69,41 +73,42 @@ void pipeclose(struct pipe *pi, int writable){
     release(&pi->lock);
 }
 
-int pipewrite(struct pipe *pi, uint64 addr, int n){
-  int i = 0;
+int
+pipewrite(struct pipe *pi, uint64 addr, int n)
+{
+  int i;
+  char ch;
   struct proc *pr = myproc();
 
   acquire(&pi->lock);
-  while(i < n){
-    if(pi->readopen == 0 || pr->killed){
-      release(&pi->lock);
-      return -1;
-    }
-    if(pi->nwrite == pi->nread + PIPESIZE){ //DOC: pipewrite-full
+  for(i = 0; i < n; i++){
+    while(pi->nwrite == pi->nread + PIPESIZE){  //DOC: pipewrite-full
+      if(pi->readopen == 0 || myproc()->killed){
+        release(&pi->lock);
+        return -1;
+      }
       wakeup(&pi->nread);
       sleep(&pi->nwrite, &pi->lock);
-    } else {
-      char ch;
-      if(copyin(pr->pagetable, &ch, addr + i, 1) == -1)
-        break;
-      pi->data[pi->nwrite++ % PIPESIZE] = ch;
-      i++;
     }
+    if(copyin(pr->pagetable, &ch, addr + i, 1) == -1)
+      break;
+    pi->data[pi->nwrite++ % PIPESIZE] = ch;
   }
   wakeup(&pi->nread);
   release(&pi->lock);
-
-  return i;
+  return n;
 }
 
-int piperead(struct pipe *pi, uint64 addr, int n){
+int
+piperead(struct pipe *pi, uint64 addr, int n)
+{
   int i;
   struct proc *pr = myproc();
   char ch;
 
   acquire(&pi->lock);
   while(pi->nread == pi->nwrite && pi->writeopen){  //DOC: pipe-empty
-    if(pr->killed){
+    if(myproc()->killed){
       release(&pi->lock);
       return -1;
     }

@@ -32,12 +32,12 @@
 
 // Contents of the header block, used for both the on-disk header block
 // and to keep track in memory of logged block# before commit.
-struct logheader{
+struct logheader {
   int n;
   int block[LOGSIZE];
 };
 
-struct log{
+struct log {
   struct spinlock lock;
   int start;
   int size;
@@ -51,7 +51,9 @@ struct log log;
 static void recover_from_log(void);
 static void commit();
 
-void initlog(int dev, struct superblock *sb){
+void
+initlog(int dev, struct superblock *sb)
+{
   if (sizeof(struct logheader) >= BSIZE)
     panic("initlog: too big logheader");
 
@@ -63,7 +65,9 @@ void initlog(int dev, struct superblock *sb){
 }
 
 // Copy committed blocks from log to their home location
-static void install_trans(int recovering){
+static void
+install_trans(void)
+{
   int tail;
 
   for (tail = 0; tail < log.lh.n; tail++) {
@@ -71,15 +75,16 @@ static void install_trans(int recovering){
     struct buf *dbuf = bread(log.dev, log.lh.block[tail]); // read dst
     memmove(dbuf->data, lbuf->data, BSIZE);  // copy block to dst
     bwrite(dbuf);  // write dst to disk
-    if(recovering == 0)
-      bunpin(dbuf);
+    bunpin(dbuf);
     brelse(lbuf);
     brelse(dbuf);
   }
 }
 
 // Read the log header from disk into the in-memory log header
-static void read_head(void){
+static void
+read_head(void)
+{
   struct buf *buf = bread(log.dev, log.start);
   struct logheader *lh = (struct logheader *) (buf->data);
   int i;
@@ -93,7 +98,9 @@ static void read_head(void){
 // Write in-memory log header to disk.
 // This is the true point at which the
 // current transaction commits.
-static void write_head(void){
+static void
+write_head(void)
+{
   struct buf *buf = bread(log.dev, log.start);
   struct logheader *hb = (struct logheader *) (buf->data);
   int i;
@@ -105,15 +112,19 @@ static void write_head(void){
   brelse(buf);
 }
 
-static void recover_from_log(void){
+static void
+recover_from_log(void)
+{
   read_head();
-  install_trans(1); // if committed, copy from log to disk
+  install_trans(); // if committed, copy from log to disk
   log.lh.n = 0;
   write_head(); // clear the log
 }
 
 // called at the start of each FS system call.
-void begin_op(void){
+void
+begin_op(void)
+{
   acquire(&log.lock);
   while(1){
     if(log.committing){
@@ -131,7 +142,9 @@ void begin_op(void){
 
 // called at the end of each FS system call.
 // commits if this was the last outstanding operation.
-void end_op(void){
+void
+end_op(void)
+{
   int do_commit = 0;
 
   acquire(&log.lock);
@@ -161,7 +174,9 @@ void end_op(void){
 }
 
 // Copy modified blocks from cache to log.
-static void write_log(void){
+static void
+write_log(void)
+{
   int tail;
 
   for (tail = 0; tail < log.lh.n; tail++) {
@@ -174,11 +189,13 @@ static void write_log(void){
   }
 }
 
-static void commit(){
+static void
+commit()
+{
   if (log.lh.n > 0) {
     write_log();     // Write modified blocks from cache to log
     write_head();    // Write header to disk -- the real commit
-    install_trans(0); // Now install writes to home locations
+    install_trans(); // Now install writes to home locations
     log.lh.n = 0;
     write_head();    // Erase the transaction from the log
   }
@@ -193,15 +210,17 @@ static void commit(){
 //   modify bp->data[]
 //   log_write(bp)
 //   brelse(bp)
-void log_write(struct buf *b){
+void
+log_write(struct buf *b)
+{
   int i;
 
-  acquire(&log.lock);
   if (log.lh.n >= LOGSIZE || log.lh.n >= log.size - 1)
     panic("too big a transaction");
   if (log.outstanding < 1)
     panic("log_write outside of trans");
 
+  acquire(&log.lock);
   for (i = 0; i < log.lh.n; i++) {
     if (log.lh.block[i] == b->blockno)   // log absorbtion
       break;

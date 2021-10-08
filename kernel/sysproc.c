@@ -7,7 +7,9 @@
 #include "spinlock.h"
 #include "proc.h"
 
-uint64 sys_exit(void){
+uint64
+sys_exit(void)
+{
   int n;
   if(argint(0, &n) < 0)
     return -1;
@@ -15,22 +17,30 @@ uint64 sys_exit(void){
   return 0;  // not reached
 }
 
-uint64 sys_getpid(void){
+uint64
+sys_getpid(void)
+{
   return myproc()->pid;
 }
 
-uint64 sys_fork(void){
+uint64
+sys_fork(void)
+{
   return fork();
 }
 
-uint64 sys_wait(void){
+uint64
+sys_wait(void)
+{
   uint64 p;
   if(argaddr(0, &p) < 0)
     return -1;
   return wait(p);
 }
 
-uint64 sys_sbrk(void){
+uint64
+sys_sbrk(void)
+{
   int addr;
   int n;
 
@@ -42,7 +52,9 @@ uint64 sys_sbrk(void){
   return addr;
 }
 
-uint64 sys_sleep(void){
+uint64
+sys_sleep(void)
+{
   int n;
   uint ticks0;
 
@@ -62,7 +74,9 @@ uint64 sys_sleep(void){
   return 0;
 }
 
-uint64 sys_kill(void){
+uint64
+sys_kill(void)
+{
   int pid;
 
   if(argint(0, &pid) < 0)
@@ -72,11 +86,34 @@ uint64 sys_kill(void){
 
 // return how many clock tick interrupts have occurred
 // since start.
-uint64 sys_uptime(void){
+uint64
+sys_uptime(void)
+{
   uint xticks;
 
   acquire(&tickslock);
   xticks = ticks;
   release(&tickslock);
   return xticks;
+}
+
+uint64 sys_pcbread(void){
+
+  struct proc* p = myproc();
+  char const* procstateNames[] = {"UNUSED", "USED", "SLEEPING", "RUNNABLE", "RUNNING", "ZOMBIE"};
+  printf("\nProc Structure Entries for current process:\n");
+  printf("-------------------------------------------\n");
+  printf("Name: %s\n", p->name);
+  printf("PID: %d\n", p->pid);
+  printf("Parent Process PID: %d\n", p->parent->pid);
+  printf("Size: %d Bytes\n", p->sz);
+  printf("Process State: %s\n", procstateNames[p->state]);
+  printf("Channel: %p\n", p->chan);
+  printf("Killed Status: %d\n", p->killed);
+  printf("Exit Status: %d\n", p->xstate);
+  printf("KStack location: %p\n", p->kstack);
+  printf("Trapframe: %p\n", p->tf);
+  printf("Pagetable base address: %p\n", p->pagetable);
+  printf("Context: %p\n", &p->context);
+  return 0;
 }

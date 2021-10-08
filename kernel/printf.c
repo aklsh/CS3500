@@ -18,14 +18,16 @@
 volatile int panicked = 0;
 
 // lock to avoid interleaving concurrent printf's.
-static struct{
+static struct {
   struct spinlock lock;
   int locking;
 } pr;
 
 static char digits[] = "0123456789abcdef";
 
-static void printint(int xx, int base, int sign){
+static void
+printint(int xx, int base, int sign)
+{
   char buf[16];
   int i;
   uint x;
@@ -47,7 +49,9 @@ static void printint(int xx, int base, int sign){
     consputc(buf[i]);
 }
 
-static void printptr(uint64 x){
+static void
+printptr(uint64 x)
+{
   int i;
   consputc('0');
   consputc('x');
@@ -56,7 +60,9 @@ static void printptr(uint64 x){
 }
 
 // Print to the console. only understands %d, %x, %p, %s.
-void printf(char *fmt, ...){
+void
+printf(char *fmt, ...)
+{
   va_list ap;
   int i, c, locking;
   char *s;
@@ -108,33 +114,38 @@ void printf(char *fmt, ...){
     release(&pr.lock);
 }
 
-void panic(char *s){
+void
+panic(char *s)
+{
   pr.locking = 0;
   printf("panic: ");
   printf(s);
   printf("\n");
-  panicked = 1; // freeze uart output from other CPUs
+  panicked = 1; // freeze other CPUs
   for(;;)
     ;
 }
 
-void printfinit(void){
+void
+printfinit(void)
+{
   initlock(&pr.lock, "pr");
   pr.locking = 1;
 }
 
 void backtrace(){
-  uint64* currFP;
-  uint64 stackPGUP, stackPGDOWN, retAddr;
-  currFP = (uint64*) r_fp();
-  stackPGUP = PGROUNDUP(*currFP);
-  stackPGDOWN = PGROUNDDOWN(*currFP);
+  uint64 currFP, stackBottom, retAddr;
+  currFP = r_fp();
+  printf("backtrace:\n");
+  stackBottom = PGROUNDUP(currFP);
 
-  while(stackPGUP != stackPGDOWN){
-    retAddr = *(currFP-1);
-    printf("%p\n", retAddr);
-    currFP = (uint64*) (*(currFP - 2));
-    stackPGUP = PGROUNDUP(*currFP);
-    stackPGDOWN = PGROUNDDOWN(*currFP);
+  while(currFP != stackBottom){
+    printf("Stack pointer: %p, ", stackBottom);
+    retAddr = *(uint64*)(currFP - 8);
+    printf("Frame pointer: %p, ", currFP);
+    printf("Return Address: %p\n", retAddr);
+    currFP = *(uint64*)(currFP - 16);
+    stackBottom = PGROUNDUP(currFP);
   }
+    printf("Stack pointer: %p, Frame pointer: %p\n", stackBottom, currFP);
 }

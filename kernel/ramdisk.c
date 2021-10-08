@@ -1,5 +1,5 @@
 //
-// ramdisk that uses the disk image loaded by qemu -initrd fs.img
+// ramdisk that uses the disk image loaded by qemu -rdinit fs.img
 //
 
 #include "types.h"
@@ -12,12 +12,16 @@
 #include "fs.h"
 #include "buf.h"
 
-void ramdiskinit(void){
+void
+ramdiskinit(void)
+{
 }
 
 // If B_DIRTY is set, write buf to disk, clear B_DIRTY, set B_VALID.
 // Else if B_VALID is not set, read buf from disk, set B_VALID.
-void ramdiskrw(struct buf *b){
+void
+ramdiskrw(struct buf *b)
+{
   if(!holdingsleep(&b->lock))
     panic("ramdiskrw: buf not locked");
   if((b->flags & (B_VALID|B_DIRTY)) == B_VALID)

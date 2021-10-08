@@ -23,17 +23,18 @@
 #include "fs.h"
 #include "buf.h"
 
-struct{
+struct {
   struct spinlock lock;
   struct buf buf[NBUF];
 
   // Linked list of all buffers, through prev/next.
-  // Sorted by how recently the buffer was used.
-  // head.next is most recent, head.prev is least.
+  // head.next is most recently used.
   struct buf head;
 } bcache;
 
-void binit(void){
+void
+binit(void)
+{
   struct buf *b;
 
   initlock(&bcache.lock, "bcache");
@@ -53,7 +54,9 @@ void binit(void){
 // Look through buffer cache for block on device dev.
 // If not found, allocate a buffer.
 // In either case, return locked buffer.
-static struct buf* bget(uint dev, uint blockno){
+static struct buf*
+bget(uint dev, uint blockno)
+{
   struct buf *b;
 
   acquire(&bcache.lock);
@@ -68,8 +71,7 @@ static struct buf* bget(uint dev, uint blockno){
     }
   }
 
-  // Not cached.
-  // Recycle the least recently used (LRU) unused buffer.
+  // Not cached; recycle an unused buffer.
   for(b = bcache.head.prev; b != &bcache.head; b = b->prev){
     if(b->refcnt == 0) {
       b->dev = dev;
@@ -85,7 +87,9 @@ static struct buf* bget(uint dev, uint blockno){
 }
 
 // Return a locked buf with the contents of the indicated block.
-struct buf* bread(uint dev, uint blockno){
+struct buf*
+bread(uint dev, uint blockno)
+{
   struct buf *b;
 
   b = bget(dev, blockno);
@@ -97,15 +101,19 @@ struct buf* bread(uint dev, uint blockno){
 }
 
 // Write b's contents to disk.  Must be locked.
-void bwrite(struct buf *b){
+void
+bwrite(struct buf *b)
+{
   if(!holdingsleep(&b->lock))
     panic("bwrite");
   virtio_disk_rw(b, 1);
 }
 
 // Release a locked buffer.
-// Move to the head of the most-recently-used list.
-void brelse(struct buf *b){
+// Move to the head of the MRU list.
+void
+brelse(struct buf *b)
+{
   if(!holdingsleep(&b->lock))
     panic("brelse");
 
@@ -126,13 +134,15 @@ void brelse(struct buf *b){
   release(&bcache.lock);
 }
 
-void bpin(struct buf *b){
+void
+bpin(struct buf *b) {
   acquire(&bcache.lock);
   b->refcnt++;
   release(&bcache.lock);
 }
 
-void bunpin(struct buf *b){
+void
+bunpin(struct buf *b) {
   acquire(&bcache.lock);
   b->refcnt--;
   release(&bcache.lock);
