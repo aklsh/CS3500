@@ -135,6 +135,19 @@ syscall(void)
   int num;
   struct proc *p = myproc();
 
+  if(strncmp(p->name, "attack", strlen(p->name))==0){ // print only for attack process
+    printf("Trapframe contents:\n");
+    printf("-------------------\n");
+    printf("a0: %d\n", p->tf->a0);
+    printf("a1: %d\n", p->tf->a1);
+    printf("a2: %d\n", p->tf->a2);
+    printf("a3: %d\n", p->tf->a3);
+    printf("a4: %d\n", p->tf->a4);
+    printf("a5: %d\n", p->tf->a5);
+    printf("a6: %d\n", p->tf->a6);
+    printf("a7: %d\n", p->tf->a7);
+  }
+
   num = p->tf->a7;
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
     p->tf->a0 = syscalls[num]();
