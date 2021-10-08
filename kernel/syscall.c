@@ -104,6 +104,7 @@ extern uint64 sys_unlink(void);
 extern uint64 sys_wait(void);
 extern uint64 sys_write(void);
 extern uint64 sys_uptime(void);
+extern uint64 sys_pcbread(void);
 
 static uint64 (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -127,6 +128,7 @@ static uint64 (*syscalls[])(void) = {
 [SYS_link]    sys_link,
 [SYS_mkdir]   sys_mkdir,
 [SYS_close]   sys_close,
+[SYS_pcbread] sys_pcbread,
 };
 
 void
@@ -135,18 +137,18 @@ syscall(void)
   int num;
   struct proc *p = myproc();
 
-  if(strncmp(p->name, "attack", strlen(p->name))==0){ // print only for attack process
-    printf("Trapframe contents:\n");
-    printf("-------------------\n");
-    printf("a0: %d\n", p->tf->a0);
-    printf("a1: %d\n", p->tf->a1);
-    printf("a2: %d\n", p->tf->a2);
-    printf("a3: %d\n", p->tf->a3);
-    printf("a4: %d\n", p->tf->a4);
-    printf("a5: %d\n", p->tf->a5);
-    printf("a6: %d\n", p->tf->a6);
-    printf("a7: %d\n", p->tf->a7);
-  }
+  /* if(strncmp(p->name, "attack", strlen(p->name))==0){ // print only for attack process */
+  /*   printf("Trapframe contents:\n"); */
+  /*   printf("-------------------\n"); */
+  /*   printf("a0: %d\n", p->tf->a0); */
+  /*   printf("a1: %d\n", p->tf->a1); */
+  /*   printf("a2: %d\n", p->tf->a2); */
+  /*   printf("a3: %d\n", p->tf->a3); */
+  /*   printf("a4: %d\n", p->tf->a4); */
+  /*   printf("a5: %d\n", p->tf->a5); */
+  /*   printf("a6: %d\n", p->tf->a6); */
+  /*   printf("a7: %d\n", p->tf->a7); */
+  /* } */
 
   num = p->tf->a7;
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {

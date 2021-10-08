@@ -5,6 +5,8 @@
 
 int main(void) {
   fork();
+  /* mkdir("test"); */
+  /* sleep(10); */
   wait(0);
   exit(0);
 }
