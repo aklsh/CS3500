@@ -381,6 +381,63 @@ PID 4  s11: 84215045
 List your observations here.
 \begin{solution}
     These registers contain the arguments to the system calls. In case of strings or other arrays (for {\tt sys\_echo\_kernel} implemented in Assignment 2), the registers contain the pointers to these structures.
+
+    For {\tt mkdir}:
+    \begin{minted}[breaklines]
+        {text}
+    Trapframe contents:
+    -------------------
+    a0: 1864
+    a1: 12256
+    a2: 5183
+    a3: 16032
+    a4: 4984
+    a5: 238
+    a6: 0
+    a7: 20
+    \end{minted}
+    For {\tt sleep}:
+    \begin{minted}[breaklines]
+        {text}
+    Trapframe contents:
+    -------------------
+    a0: 10
+    a1: 12256
+    a2: 5183
+    a3: 16032
+    a4: 4984
+    a5: 238
+    a6: 0
+    a7: 13
+    \end{minted}
+    For {\tt wait}:
+    \begin{minted}[breaklines]
+        {text}
+    Trapframe contents:
+    -------------------
+    a0: 0
+    a1: 12256
+    a2: 5183
+    a3: 16032
+    a4: 4984
+    a5: 238
+    a6: 0
+    a7: 3
+    \end{minted}
+    For {\tt exit}:
+    \begin{minted}[breaklines]
+        {text}
+    Trapframe contents:
+    -------------------
+    a0: 0
+    a1: 12256
+    a2: 5183
+    a3: 16032
+    a4: 4984
+    a5: 238
+    a6: 0
+    a7: 2
+    \end{minted}
 \end{solution}
 \end{questions}
 
