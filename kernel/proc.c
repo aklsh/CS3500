@@ -114,7 +114,7 @@ found:
   p->state = USED;
   p->inAlarm = 0;
   p->alarmHandler = 0;
-  p->alarmInterval = 0;
+  p->alarmInterval = -1;
   p->alarmTimeLeft = -1;
   p->alarmTF = (struct trapframe *)kalloc();
 
