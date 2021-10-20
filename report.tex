@@ -1,0 +1,185 @@
+\documentclass[11pt]{exam}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=blue,
+}
+\printanswers
+\footer{}{\thepage}{}
+
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+ \geometry{a4paper,left=30mm,right=30mm,top=30mm,bottom=30mm}
+
+\usepackage{titling}
+\newcommand{\subtitle}[1]{%
+  \posttitle{%
+    \par\end{center}
+    \begin{center}\Large\textbf{#1}\end{center}}%
+}
+
+\usepackage{graphicx}
+
+\title{\textbf{CS3500: Operating Systems}}
+\subtitle{Lab 5: Signals\vspace{-1em}}
+\date{October 1, 2021}
+
+
+\begin{document}
+
+\maketitle
+
+\section*{Introduction} In this lab we will use system calls and xv6 paging  to a \textbf{tracing and alert mechanism} in xv6.
+
+\section*{Resources} Similar to the previous assignment, please go through the following resources before beginning this lab assignment:
+\begin{enumerate}
+    \item The \textbf{xv6 book}: \textbf{Chapter 4} (\textbf{Traps and System Calls}): sections \textbf{4.1}, \textbf{4.2}, \textbf{4.5}
+    \item Source files: \texttt{kernel/trampoline.S} and \texttt{kernel/trap.c}
+\end{enumerate}
+
+\section*{Note} As part of this assignment, we have provided a clean version of the xv6 repo, with the required files included in it. Please implement your solutions in this repo only. We have also attached the \LaTeX template of this document. Please write your answers in this file and submit the generated PDF (NOT the \texttt{.tex}). 
+
+
+\section{Wake me up when Sep $\cdots$ (40 points)}
+
+From emails to WhatsApp notifications, we often rely on alerts for certain events. In this section, you will add such an alarm feature to xv6 that alerts a process as it uses CPU time.
+
+\begin{questions}
+ \question[2] Think of scenarios where such a feature will be useful. Enumerate them.
+    \begin{solution}
+        \begin{enumerate}
+            \item Long build/compile workloads - can be used to cancel them if it takes more than a specified amount of time.
+            \item Clock program - let the user know how much time has passed by beeping every 1 minute or 10 minutes etc.
+            \item Scheduled execution of certain programs - for automation.
+        \end{enumerate}
+    
+    \end{solution}
+
+\question[38] More generally, you'll be implementing a primitive form of user-level interrupt/fault handlers. You could use something similar to handle page faults in the application, for example. Feel free to refer to the hints at the end of this section.
+
+\begin{parts}
+    \part[10] Add a new {\tt sigalarm(interval, handler)} system call. If an application calls {\tt sigalarm(n, fn)}, then after every {\tt n} ``ticks" of CPU time that the program consumes, the kernel should cause the application function {\tt fn} to be called. (A ``tick" is a fairly arbitrary unit of time in xv6, determined by how often a hardware timer generates interrupts.) 
+    
+    Also create a simple \texttt{sigreturn()} system call which does nothing but returns 0 for the time being. Inoke {\tt sigreturn} at the end of the alarm handler function {\tt fn}.
+    \\
+    
+    {\flushleft \bf HINT:} You need to make sure that the handler is invoked when the process's alarm interval expires. You'll need to modify {\tt usertrap()} in {\tt kernel/trap.c} so that when a process's alarm interval expires, the process executes the handler. To this end, you will need to recall how system calls work from the previous labs (i.e., the code in {\tt kernel/trampoline.S} and {\tt kernel/trap.c}). Mention  your approach as the answer below. Which register contains the user-space instruction address to which system calls return?
+
+\begin{solution}
+    Add entries {\tt alarmHandler} (address of handler), {\tt alarmInterval} (alarm interval), {\tt alarmTimeLeft} (number ticks left for next alarm) to {\tt struct proc}. Initialise them to {\tt 0}, {\tt -1} and {\tt -1}. This would ensure that the process initially has no alarm (or very long alarm interval).
+
+    In {\tt sigalarm} syscall, set {\tt alarmHandler} and {\tt alarmInterval} to the arguments given. Also set {\tt alarmTimeLeft} to {\tt alarmInterval} as the countdown has started.
+
+    In {\tt usertrap()}, check if the trap is caused by a timer interrupt by checking the value returned by {\tt which\_dev()}. Decrement the process's {\tt alarmTimeLeft} if the condition is satisfied. If {\tt alarmTimeLeft} is 0, set the {\tt epc} to {\tt alarmHandler}, so that the syscall would "return" to the alarm handler. 
+    \vspace{2mm}
+    \hrule
+    \vspace{2mm}
+
+    The register that contains the user-space instruction address to which the syscall would return is stored in the {\tt epc}, \textbf{exception program counter}.
+
+\end{solution}
+
+    \part[8] Complete the {\tt sigreturn()} system call, which ensures that when the function {\tt fn} returns, the application resumes where it left off.\\
+    
+    As a starting point: user alarm handlers are required to call the {\tt sigreturn()} system call when they have finished. Have a look at the \texttt{periodic()} function in {\tt user/alarmtest.c} for an example. You should add some code to \texttt{usertrap()} in \texttt{kernel/trap.c} and your implementation of \texttt{sys$\_$sigreturn()} that cooperate to cause the user process to resume properly after it has handled the alarm.\\
+    
+    Your solution will require you to save and restore registers. Mention your approach as the answer below. What registers do you need to save and restore to resume the interrupted code correctly? (\textbf{HINT}: it will be many).
+    
+\begin{solution}
+    To restore the state and to prevent re-entry calls to the handler, we add 2 new entries to the {\tt proc} structure - {\tt alarmTF} (trapframe structure to store state before jumping to function) and {\tt inAlarm} (to check whether if the process is already handling another alarm, and prevent it from calling again). Initialise them to 0 in {\tt allocproc()}.
+
+    In {\tt usertrap()}, instead of just checking if the trap is caused by a timer interrupt, we also check if {\tt inAlarm} is 0, to ensure that a previous alarm isn't being serviced. Before setting the {\tt epc} to the address of the alarm handler, we copy the contents of the trapframe to the {\tt alarmTF} structure.
+
+    In {\tt sigreturn} syscall, we restore the trapframe contents by copying the contents of {\tt alarmTF} into the process's trapframe structure, reset {\tt alarmTimeLeft} to {\tt alarmInterval} and unset {\tt inAlarm} so that the next alarm can be serviced.
+\end{solution}
+
+    \part[20] There is a file named \texttt{user/alarmtest.c} in the xv6 repository we have provided. This program checks your solution against three test cases. \texttt{test0} checks your \texttt{sigalarm()} implementation to see whether the alarm handler is called at all. {\tt test1} and \texttt{test2} check your \texttt{sigreturn()} implementation to see whether the handler correctly returns to the point in the application program where the timer interrupt occurred, with all registers holding the same values they held when the interrupt occurred. You can see the assembly code for \texttt{alarmtest} in {\tt user/alarmtest.asm}, which may be handy for debugging. \\
+    
+    Once you have implemented your solution, modify \texttt{Makefile} accordingly and then run \texttt{alarmtest}. If it passes {\tt test0}, {\tt test1} and {\tt test2}, run {\tt usertests} to make sure you didn't break any other parts of the kernel. Following is a sample output of {\tt alarmtest} and \texttt{usertests} if the alarm invocation and return have been handled correctly. \\
+        
+    \begin{verbatim}
+        $ alarmtest
+        test0 start
+        ........alarm!
+        test0 passed
+        test1 start
+        ...alarm!
+        ..alarm!
+        ...alarm!
+        ..alarm!
+        ...alarm!
+        ..alarm!
+        ...alarm!
+        ..alarm!
+        ...alarm!
+        ..alarm!
+        test1 passed
+        test2 start
+        ................alarm!
+        test2 passed
+        $ usertests
+        ...
+        ALL TESTS PASSED
+        $
+    \end{verbatim}
+\end{parts}
+
+\subsection{Additional hints for test cases}
+
+{\flushleft \bf \texttt{test0}: Invoking the handler} 
+
+Get started by modifying the kernel to jump to the alarm handler in user space, which will cause \texttt{test0} to print ``alarm!". At this stage, ignore if the program crashes after this. Following are some hints:
+
+\begin{itemize}
+    \item The right declarations to put in \texttt{user/user.h} are:\\
+    \begin{verbatim}
+        int sigalarm(int ticks, void (*handler)());
+        int sigreturn(void);
+    \end{verbatim}
+    \item Recall from your previous labs the changes that need to be made for system calls.
+    \item {\tt sys$\_$sigalarm()} should store the alarm interval and the pointer to the handler function in new fields in \texttt{struct proc} (in {\tt kernel/proc.h}). 
+    \item To keep track of the number of ticks passed since the last call (or are left until the next call) to a process's alarm handler, add a new field in {\tt struct proc} for this too. You can initialize \texttt{proc} fields in {\tt allocproc()} in {\tt kernel/proc.c}.
+    \item Every tick, the hardware clock forces an interrupt, which is handled in {\tt usertrap()} in \texttt{kernel/trap.c}. You should add some code there to modify a process's alarm ticks, but only in the case of a timer interrupt, something like:\\
+    \begin{verbatim}
+        if(which_dev == 2) ...
+    \end{verbatim}
+    \item It will be easier to look at traps with gdb if you configure QEMU to use only one CPU, which you can do by running:\\
+    \begin{verbatim}
+        make CPUS=1 qemu-gdb
+    \end{verbatim}
+\end{itemize}
+
+{\flushleft \bf \texttt{test1}/\texttt{test2}: Resuming interrupted code}
+
+Most probably, your {\tt alarmtest} crashes in {\tt test0} or {\tt test1} after it prints ``alarm!", or {\tt alarmtest} (eventually) prints ``test1 failed", or {\tt alarmtest} exits without printing ``test1 passed". To fix this, you must ensure that, when the alarm handler is done, control returns to the instruction at which the user program was originally interrupted by the timer interrupt. You must ensure that the register contents are restored to the values they held at the time of the interrupt, so that the user program can continue undisturbed after the alarm. Finally, you should ``re-arm" the alarm counter after each time it goes off, so that the handler is called periodically. Here are some hints:
+
+\begin{itemize}
+    \item Have \texttt{usertrap()} save enough state in {\tt struct proc} when the timer goes off, so that \texttt{sigreturn()} can correctly return to the interrupted user code.
+    \item Prevent re-entrant calls to the handler: if a handler hasn't returned yet, the kernel shouldn't call it again. {\tt test2} tests this. 
+\end{itemize}
+    
+\end{questions}
+
+
+\section*{Submission Guidelines}  
+\begin{enumerate}
+    \item Implement your solutions in the provided xv6 folder. Write your answers in the attached \LaTeX template, convert it to PDF and name it as \texttt{YOUR\_ROLL\_NO.pdf}. This will serve as a report for the assignment.
+    \item Put your entire solution xv6 folder, and the \texttt{YOUR\_ROLL\_NO.pdf} in a common folder named \texttt{YOUR\_ROLL\_NO\_LAB5}. 
+    \item Compress the folder \texttt{YOUR\_ROLL\_NO\_LAB5} into \texttt{YOUR\_ROLL\_NO\_LAB5.tar.gz} and submit the compressed folder on Moodle.
+    \item NOTE: Make sure to run \texttt{make clean}, delete any additional manual and the \texttt{.git} folder from the xv6 folder before submitting.
+\end{enumerate}
+
+\section*{Submission Guidelines}  
+\begin{enumerate}
+    \item Implement your solutions in the provided xv6 folder. Write your answers in the attached \LaTeX template, convert it to PDF and name it as \texttt{YOUR\_ROLL\_NO.pdf}. This will serve as a report for the assignment.
+    \item Put your entire solution xv6 folder, and the \texttt{YOUR\_ROLL\_NO.pdf} in a common folder named \texttt{YOUR\_ROLL\_NO\_LAB5}. 
+    \item Compress the folder \texttt{YOUR\_ROLL\_NO\_LAB5} into \texttt{YOUR\_ROLL\_NO\_LAB5.tar.gz} and submit the compressed folder on Moodle.
+    \item NOTE: Make sure to run \texttt{make clean}, delete any additional manual and the \texttt{.git} folder from the xv6 folder before submitting.
+\end{enumerate}
+
+
+
+
+\end{document}
