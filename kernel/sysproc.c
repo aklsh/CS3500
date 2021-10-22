@@ -92,6 +92,7 @@ uint64 sys_sigalarm(void){
   if(argaddr(1, &fn) < 0)
     return -1;
 
+  p->hasAlarm = 1;
   p->alarmHandler = fn;
   p->alarmInterval = n;
   p->alarmTimeLeft = n;

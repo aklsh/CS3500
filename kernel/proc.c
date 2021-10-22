@@ -113,6 +113,7 @@ found:
   p->pid = allocpid();
   p->state = USED;
   p->inAlarm = 0;
+  p->hasAlarm = 0;
   p->alarmHandler = 0;
   p->alarmInterval = -1;
   p->alarmTimeLeft = -1;
@@ -161,6 +162,7 @@ static void freeproc(struct proc *p){
   p->xstate = 0;
   p->state = UNUSED;
   p->inAlarm = 0;
+  p->hasAlarm = 0;
   p->alarmHandler = 0;
   p->alarmInterval = 0;
   p->alarmTimeLeft = -1;

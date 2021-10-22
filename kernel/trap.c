@@ -71,7 +71,7 @@ void usertrap(void){
     exit(-1);
 
   // give up the CPU if this is a timer interrupt.
-  if(which_dev == 2 && p->inAlarm == 0){
+  if(which_dev == 2 && p->inAlarm == 0 && p->hasAlarm == 1){
     p->alarmTimeLeft--;
     if(p->alarmTimeLeft == 0){
       p->inAlarm = 1;

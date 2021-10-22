@@ -110,4 +110,5 @@ struct proc{
   uint64 alarmTimeLeft;        // Time left to next alarm call
   struct trapframe *alarmTF;   // Trapframe to store actual trapframe before going into handler
   int inAlarm;                 // To check whether in alarm handler or not
+  int hasAlarm;                // To see whether there is alarm call in process or not
 };
