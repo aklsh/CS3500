@@ -68,9 +68,9 @@ From emails to WhatsApp notifications, we often rely on alerts for certain event
     {\flushleft \bf HINT:} You need to make sure that the handler is invoked when the process's alarm interval expires. You'll need to modify {\tt usertrap()} in {\tt kernel/trap.c} so that when a process's alarm interval expires, the process executes the handler. To this end, you will need to recall how system calls work from the previous labs (i.e., the code in {\tt kernel/trampoline.S} and {\tt kernel/trap.c}). Mention  your approach as the answer below. Which register contains the user-space instruction address to which system calls return?
 
 \begin{solution}
-    Add entries {\tt alarmHandler} (address of handler), {\tt alarmInterval} (alarm interval), {\tt alarmTimeLeft} (number ticks left for next alarm) to {\tt struct proc}. Initialise them to {\tt 0}, {\tt -1} and {\tt -1}. This would ensure that the process initially has no alarm (or very long alarm interval).
+    Add entries {\tt alarmHandler} (address of handler), {\tt alarmInterval} (alarm interval), {\tt alarmTimeLeft} (number ticks left for next alarm) and {\tt hasAlarm} (to check whether the process has an alarm call) to {\tt struct proc}. Initialise them to {\tt 0}, {\tt -1} and {\tt -1} and {\tt 0}. This would ensure that the process initially has no alarm (or very long alarm interval).
 
-    In {\tt sigalarm} syscall, set {\tt alarmHandler} and {\tt alarmInterval} to the arguments given. Also set {\tt alarmTimeLeft} to {\tt alarmInterval} as the countdown has started.
+    In {\tt sigalarm} syscall, set {\tt alarmHandler} and {\tt alarmInterval} to the arguments given. Also set {\tt alarmTimeLeft} to {\tt alarmInterval} as the countdown has started. Set {\tt hasAlarm} to 1 to indicate that the process has an alarm call.
 
     In {\tt usertrap()}, check if the trap is caused by a timer interrupt by checking the value returned by {\tt which\_dev()}. Decrement the process's {\tt alarmTimeLeft} if the condition is satisfied. If {\tt alarmTimeLeft} is 0, set the {\tt epc} to {\tt alarmHandler}, so that the syscall would "return" to the alarm handler. 
     \vspace{2mm}
