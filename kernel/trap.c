@@ -61,6 +61,31 @@ void usertrap(void){
     syscall();
   } else if((which_dev = devintr()) != 0){
     // ok
+  } else if(r_scause() == 15){ // Store page fault
+    uint64 faultingVA = r_stval();
+    pte_t* pte;
+    if (((pte = walk(p->pagetable, faultingVA, 0)) == 0) || ((*pte & PTE_C) == 0)) {
+      // unmapped or not a COW page.
+      printf("usertrap(): unexpected scause %p pid=%d\n", r_scause(), p->pid);
+      printf("            sepc=%p stval=%p\n", r_sepc(), r_stval());
+      p->killed = 1;
+      exit(-1);
+    }
+    char *mem = kalloc();
+    if (mem == 0) {
+      p->killed = 1;
+      exit(-1);
+    }
+    uint64 pa = PTE2PA((uint64)*pte);
+    uint64 va = PGROUNDDOWN(faultingVA);
+    int flags = PTE_FLAGS((uint64)*pte) | PTE_W;
+    flags &= ~PTE_C;
+    memmove(mem, (void*)pa, PGSIZE);
+    uvmunmap(p->pagetable, va, 1, 1);
+    if(mappages(p->pagetable, va, PGSIZE, (uint64)mem, flags) != 0) {
+      kfree(mem);
+      p->killed = 1;
+    }
   } else {
     printf("usertrap(): unexpected scause %p pid=%d\n", r_scause(), p->pid);
     printf("            sepc=%p stval=%p\n", r_sepc(), r_stval());
