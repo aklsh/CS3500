@@ -85,3 +85,9 @@ void increaseRefCount(uint64 pa){
   refCount[REFCOUNTINDEX(pa)]++;
   release(&kmem.lock);
 }
+
+void decreaseRefCount(uint64 pa){
+  acquire(&kmem.lock);
+  refCount[REFCOUNTINDEX(pa)]--;
+  release(&kmem.lock);
+}

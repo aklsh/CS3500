@@ -163,7 +163,8 @@ void uvmunmap(pagetable_t pagetable, uint64 va, uint64 npages, int do_free){
       panic("uvmunmap: not mapped");
     if(PTE_FLAGS(*pte) == PTE_V)
       panic("uvmunmap: not a leaf");
-    refCountPage = --refCount[REFCOUNTINDEX(PTE2PA(*pte))];
+    decreaseRefCount(PTE2PA(*pte));
+    refCountPage = refCount[REFCOUNTINDEX(PTE2PA(*pte))];
     if (refCountPage < 0)
       panic("uvmunmap: refCountPage < 0");
     if(do_free && (refCountPage == 0)){
