@@ -1,38 +1,39 @@
-\documentclass[11pt,a4paper,english]{paper} 
+\documentclass[12pt,a4paper,english]{paper} 
 \usepackage{fontspec}
 \usepackage[utf8]{inputenc}
-\usepackage[margin=2cm]{geometry}
+\usepackage[left=0.65in,right=0.65in,top=2cm,bottom=1.75cm]{geometry}
 \usepackage{multirow}
+\usepackage{hyperref}
 \usepackage{graphicx}
 \usepackage{bm}
 \usepackage[usenames,dvipsnames]{color}
 \usepackage{booktabs}
+\usepackage[inline]{enumitem}
 \usepackage{fancyhdr}
 \usepackage[most]{tcolorbox}
-\usepackage[authoryear]{natbib}
+\usepackage{changepage}
+\usepackage[square,sort,comma,numbers]{natbib}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{eucal}
 \usepackage[]{minted}
-\usepackage{enumitem}
 \usepackage{latexsym}
 \usepackage{indentfirst}
+\usepackage{tablefootnote}
+\usepackage[ruled,vlined]{algorithm2e}
 \usepackage[english]{babel}
 \usepackage[autostyle, english = american]{csquotes}
-\usepackage{titlesec}
-
-\titleformat*{\section}{\LARGE\bfseries}
-\titleformat*{\subsection}{\Large\bfseries}
-\titleformat*{\subsubsection}{\large}
+\usepackage{paralist}
+\setlist[itemize]{noitemsep, topsep=0pt}
 \MakeOuterQuote{"}
-
-\setmonofont[Scale=0.75]{Hack NF}
 
 \def \courseNumber {CS3500}
 \def \courseName {Operating Systems}
-\def \assignmentName {<Lab Name>}
+\def \assignmentName {Copy on Write}
 \def \myName {Akilesh Kannan}
 \def \rollNumber {EE18B122}
+
+\setlength{\headheight}{14pt}
 
 \pagestyle{fancy}
 \fancyhf{}
@@ -40,7 +41,7 @@
 \lhead{\courseNumber: \courseName}
 \cfoot{\thepage}
 
-\linespread{1.2}
+% \linespread{1.2}
 
 \renewcommand{\familydefault}{\sfdefault} %command to change font to sans-serif
 
@@ -49,11 +50,46 @@
 \definecolor{red(ryb)}{rgb}{1.0, 0.01, 0.28}
 \definecolor{black(ryb)}{rgb}{0, 0, 0}
 \definecolor{gray(ryb)}{rgb}{0.75, 0.75, 0.75}
+\definecolor{orange}{RGB}{255,155,0}
+\definecolor{formalblue}{rgb}{0.95,0.95,1}
+\definecolor{formalred}{rgb}{1,0.95,0.95}
 
 \newenvironment{colorboxed}[4][gray]{
-\begin{tcolorbox}[colback=#1!3!white,colframe=#1(ryb)!50!black,title=\textbf{#2: #3},#4]
+\begin{tcolorbox}[colback=#1!3!white,colframe=#1(ryb)!50!black,title=\textbf{#2 #3},#4]
 }{
 \end{tcolorbox}
+}
+
+\newenvironment{warning}{%
+  \def\FrameCommand{%
+    \hspace{1pt}%
+    {\color{red}\vrule width 2pt}%
+    {\color{formalred}\vrule width 4pt}%
+    \colorbox{formalred}%
+  }%
+  \MakeFramed{\advance\hsize-\width\FrameRestore}%
+  \noindent\hspace{-4.55pt}% disable indenting first paragraph
+  \begin{adjustwidth}{7pt}{}%
+  \vspace{2pt}\vspace{2pt}%
+}
+{%
+  \vspace{2pt}\end{adjustwidth}\endMakeFramed%
+}
+
+\newenvironment{results}{%
+  \def\FrameCommand{%
+    \hspace{1pt}%
+    {\color{blue}\vrule width 2pt}%
+    {\color{formalblue}\vrule width 4pt}%
+    \colorbox{formalblue}%
+  }%
+  \MakeFramed{\advance\hsize-\width\FrameRestore}%
+  \noindent\hspace{-4.55pt}% disable indenting first paragraph
+  \begin{adjustwidth}{7pt}{}%
+  \vspace{2pt}\vspace{2pt}%
+}
+{%
+  \vspace{2pt}\end{adjustwidth}\endMakeFramed%
 }
 
 \begin{document} 
@@ -73,6 +109,28 @@
 \hrule \hrule
 \medskip
 \vspace{-0.2cm}
+
+\section{Reference Counts}
+The implementation of copy-on-write is done using an array \texttt{refCount[]} to keep track of the number of processes in which a physical pageframe is referenced due to the copy-on-write mechanism.
+This array will be initialized to {\tt 0} for all physical pageframes. Whenever the pageframe is newly allocated, the reference count is set to {\tt 1}. 
+Further allocations of the same physical pageframe will increment the reference count by {\tt 1}.
+When a process using that physical pageframe is finished/killed, the reference count is decremented by {\tt 1}. If the reference count becomes {\tt 0}, the physical pageframe is deallocated.
+
+\section{\texttt{PTE\_C} bit}
+I have used the \texttt{PTE\_C} bit to indicate whether the pageframe and the corresponding pagetable entry is shared between processes due to copy-on-write or not. If the \texttt{PTE\_C} bit is set to {\tt 1}, the pageframe is copy-on-write. It is denoted by the bit 8 (LSB is bit {\tt 0}) in the PTE, using one of the reserved bits.
+
+\section{Testing}
+The verification of the correctness of the copy-on-write mechanism is done by running the \texttt{user/cowtest.c} and \texttt{user/usertests.c} program. The former was given as a part of MIT's \texttt{6.S081} course.
+
+\section{Modified/New functions}
+\begin{compactitem}
+    \item{\texttt{uvmcopy()}}
+    \item{\texttt{usertrap()}}
+    \item{\texttt{uvmunmap()}}
+    \item{\texttt{kalloc()}}
+    \item{\texttt{copyout()}}
+    \item{\texttt{increaseRefCount()}}
+\end{compactitem}
 
 
 %%Beginning References. Don't add any text beyond this.
