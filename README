@@ -11,6 +11,7 @@ Notes to Self
 - Add new programs you write to Makefile
 - make qemu: to enter into xv6
 - make qemu-gdb: to debug programs. Connect to running xv6 from gdb in another shell
+- Branch new assignments from *main* only. Use the base copy always, unless otherwise specified.
 
 Acknowledgments
 ---------------
