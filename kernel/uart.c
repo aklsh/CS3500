@@ -90,12 +90,33 @@ void uartputc(int c){
   }
 
   while(1){
+    int encrypt = 0, base = 0;
     if(uart_tx_w == uart_tx_r + UART_TX_BUF_SIZE){
       // buffer is full.
       // wait for uartstart() to open up space in the buffer.
       sleep(&uart_tx_r, &uart_tx_lock);
     } else {
-      uart_tx_buf[uart_tx_w % UART_TX_BUF_SIZE] = c;
+      // check if character
+      // A-Z: 65-90
+      // a-z: 97-122
+      // 0-9: 48-57
+      if (c >= 65 && c <= 90) {
+        encrypt = 1;
+        base = 65;
+      } else if (c >= 97 && c <= 122) {
+        encrypt = 1;
+        base = 97;
+      } else if (c >= 48 && c <= 57) {
+        encrypt  = 1;
+        base = 48;
+      } else {
+        // not a valid character
+        // do nothing
+      }
+      if(encrypt)
+        uart_tx_buf[uart_tx_w % UART_TX_BUF_SIZE] = ((c-base+SERIAL_PORT_KEY)%SERIAL_PORT_MODULO)+base;
+      else
+        uart_tx_buf[uart_tx_w % UART_TX_BUF_SIZE] = c;
       uart_tx_w += 1;
       uartstart();
       release(&uart_tx_lock);
@@ -119,7 +140,30 @@ void uartputc_sync(int c){
   // wait for Transmit Holding Empty to be set in LSR.
   while((ReadReg(LSR) & LSR_TX_IDLE) == 0)
     ;
-  WriteReg(THR, c);
+
+  int encrypt = 0, charToPut, base = 0;
+  // check if character
+  // A-Z: 65-90
+  // a-z: 97-122
+  // 0-9: 48-57
+  if (c >= 65 && c <= 90) {
+    encrypt = 1;
+    base = 65;
+  } else if (c >= 97 && c <= 122) {
+    encrypt = 1;
+    base = 97;
+  } else if (c >= 48 && c <= 57) {
+    encrypt  = 1;
+    base = 48;
+  } else {
+    // not a valid character
+    // do nothing
+  }
+  if(encrypt)
+    charToPut = ((c-base+SERIAL_PORT_KEY)%SERIAL_PORT_MODULO)+base;
+  else
+    charToPut = c;
+  WriteReg(THR, charToPut);
 
   pop_off();
 }

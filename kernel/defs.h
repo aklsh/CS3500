@@ -185,3 +185,5 @@ void            virtio_disk_intr(void);
 
 // number of elements in fixed-size array
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))
+#define SERIAL_PORT_KEY 1
+#define SERIAL_PORT_MODULO 26
